@@ -1,0 +1,31 @@
+{
+  "parser": "MGU Store upstream repoCatalog + packComponent",
+  "components": [
+    {
+      "id": "iyt_app",
+      "title": "iYT",
+      "version": "0.4.0",
+      "requires": {
+        "mgu-python": "1.0.2",
+        "mgu-deploy": "0.3.2",
+        "iyt-daemon": "0.4.0",
+        "mgu-render": "0.6.11",
+        "mgu-inputgate": "1.0.0"
+      }
+    },
+    {
+      "id": "iyt-daemon",
+      "title": "iYT playback service",
+      "version": "0.4.0",
+      "requires": {
+        "mgu-deploy": "0.7.0",
+        "mgu-python": "1.0.2",
+        "jap-node22": "22.23.4",
+        "mgu-render": "0.6.11"
+      }
+    }
+  ],
+  "skipped": [],
+  "toolBytes": 3362910,
+  "result": "passed"
+}

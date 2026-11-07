@@ -1,0 +1,155 @@
+[
+  {
+    "suite": "baseline",
+    "test": "test_runtime",
+    "code": 0,
+    "duration_s": 12.012
+  },
+  {
+    "suite": "baseline",
+    "test": "test_life",
+    "code": 0,
+    "duration_s": 0.365
+  },
+  {
+    "suite": "baseline",
+    "test": "test_parked",
+    "code": 0,
+    "duration_s": 0.353
+  },
+  {
+    "suite": "baseline",
+    "test": "test_qr",
+    "code": 0,
+    "duration_s": 0.445
+  },
+  {
+    "suite": "baseline",
+    "test": "test_ridetube",
+    "code": 0,
+    "duration_s": 3.079
+  },
+  {
+    "suite": "baseline",
+    "test": "daemon",
+    "code": 0,
+    "duration_s": 28.352
+  },
+  {
+    "suite": "baseline",
+    "test": "thumbnails",
+    "code": 0,
+    "duration_s": 1.256
+  },
+  {
+    "suite": "baseline",
+    "test": "media",
+    "code": 1,
+    "duration_s": 9.49
+  },
+  {
+    "suite": "baseline",
+    "test": "native",
+    "code": 0,
+    "duration_s": 8.406
+  },
+  {
+    "suite": "enhanced",
+    "test": "test_runtime",
+    "code": 0,
+    "duration_s": 11.985
+  },
+  {
+    "suite": "enhanced",
+    "test": "test_life",
+    "code": 0,
+    "duration_s": 0.337
+  },
+  {
+    "suite": "enhanced",
+    "test": "test_parked",
+    "code": 0,
+    "duration_s": 0.338
+  },
+  {
+    "suite": "enhanced",
+    "test": "test_qr",
+    "code": 0,
+    "duration_s": 0.45
+  },
+  {
+    "suite": "enhanced",
+    "test": "test_ridetube",
+    "code": 0,
+    "duration_s": 23.114
+  },
+  {
+    "suite": "enhanced",
+    "test": "daemon",
+    "code": 0,
+    "duration_s": 28.319
+  },
+  {
+    "suite": "enhanced",
+    "test": "thumbnails",
+    "code": 0,
+    "duration_s": 1.421
+  },
+  {
+    "suite": "enhanced",
+    "test": "media",
+    "code": 0,
+    "duration_s": 11.019
+  },
+  {
+    "suite": "enhanced",
+    "test": "native",
+    "code": 0,
+    "duration_s": 7.948
+  },
+  {
+    "suite": "enhanced",
+    "test": "regressions",
+    "code": 0
+  },
+  {
+    "suite": "enhanced",
+    "test": "updater",
+    "code": 0
+  },
+  {
+    "suite": "enhanced",
+    "test": "diagnostics",
+    "code": 0
+  },
+  {
+    "suite": "enhanced",
+    "test": "router",
+    "code": 0
+  },
+  {
+    "suite": "deployment",
+    "test": "store-discovery",
+    "code": 0
+  },
+  {
+    "suite": "deployment",
+    "test": "store-sdk-donor",
+    "code": 0
+  },
+  {
+    "suite": "deployment",
+    "test": "target-abi",
+    "code": 0
+  },
+  {
+    "suite": "deployment",
+    "test": "service-lock",
+    "code": 0
+  },
+  {
+    "suite": "deployment",
+    "test": "live-extraction-metadata",
+    "code": 0
+  }
+]

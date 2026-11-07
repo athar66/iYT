@@ -1,0 +1,10 @@
+.tools/
+build/
+**/__pycache__/
+source/oap-sdk/
+source/dist/
+source/native/*/build/
+source/native/*/dist/
+upstream/
+dist/*
+!dist/release/

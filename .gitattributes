@@ -1,0 +1,7 @@
+* text=auto eol=lf
+*.png binary
+*.pyz binary
+*.tgz binary
+*.tar.gz binary
+source/native/iyt-daemon/prebuilt/ytdec binary
+source/native/iyt-daemon/prebuilt/iyt-lock binary

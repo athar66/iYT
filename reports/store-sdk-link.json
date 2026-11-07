@@ -1,0 +1,12 @@
+{
+  "result": "passed",
+  "input": "actual SDK-free iYT release package",
+  "api": [
+    "OnlineApp",
+    "logging",
+    "SDKError",
+    "someipBuilders"
+  ],
+  "donor": "upstream synthetic fixture; NOT real BMW firmware",
+  "generatedSdkPublished": false
+}

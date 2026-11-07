@@ -1,0 +1,15 @@
+make: Entering directory '/mnt/f/APPS/iDrive Toolkit/ridetube-enhanced/source/native/ytdec'
+mkdir -p build/host
+g++ -std=c++14 -O2 -g -Wall -Wextra -Werror -Isrc -o build/host/nal_reader_test test/nal_reader_test.cpp src/nal_reader.cpp
+mkdir -p build/host
+g++ -std=c++14 -O2 -g -Wall -Wextra -Werror -Isrc -Iabi/include -o build/host/player_test test/player_test.cpp src/player.cpp src/index.cpp src/mgvf.cpp
+build/host/nal_reader_test
+nal_reader_test: all passed
+build/host/player_test
+  mgvf + nv12_to_i420 ok
+  index ok (300 records)
+  playback ok: shown 249 dropped 13 decoded 307
+  tail ok: shown 300 dropped 0
+  no eof while .part, eof after the rename ok
+player_test: all passed
+make: Leaving directory '/mnt/f/APPS/iDrive Toolkit/ridetube-enhanced/source/native/ytdec'

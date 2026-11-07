@@ -1,0 +1,3 @@
+router: modes, fps, atlas, optional state, fail-closed hardware passed
+cluster socket: hello, map layer, atlas frame and safety release passed (simulated)
+native allocation limits: passed

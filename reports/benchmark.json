@@ -1,0 +1,29 @@
+{
+  "environment": "WSL Ubuntu x86_64; fake decoder, synthetic frames; NOT vehicle playback",
+  "results": [
+    {
+      "variant": "baseline",
+      "wall_ms": [
+        10.949833000040599,
+        10.119437000014386,
+        11.279209999997875,
+        11.264231999973617,
+        10.320255000010548
+      ],
+      "median_ms": 10.949833000040599,
+      "output": "  mgvf + nv12_to_i420 ok\n  index ok (300 records)\n  playback ok: shown 249 dropped 13 decoded 307\n  tail ok: shown 300 dropped 0\n  no eof while .part, eof after the rename ok\nplayer_test: all passed\n"
+    },
+    {
+      "variant": "enhanced",
+      "wall_ms": [
+        10.165138999980172,
+        9.53463900003726,
+        9.69568799996523,
+        9.375964000014392,
+        10.272766000014144
+      ],
+      "median_ms": 9.69568799996523,
+      "output": "  mgvf + nv12_to_i420 ok\n  index ok (300 records)\n  playback ok: shown 249 dropped 13 decoded 307\n  tail ok: shown 300 dropped 0\n  no eof while .part, eof after the rename ok\nplayer_test: all passed\n"
+    }
+  ]
+}

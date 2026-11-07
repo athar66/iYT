@@ -1,0 +1,122 @@
+[
+  {
+    "path": "source/README.md",
+    "status": "modified",
+    "sha256": "81d3a8f0d91fc97dd80d562ef225f8838ec5000ed1c6fbd725e91dacdef8b4ec"
+  },
+  {
+    "path": "source/apps/rte_ridetube/app.json",
+    "status": "modified",
+    "sha256": "5d2f12c9abb24b6813f1a48f34c86ea17c8337ed56a455afc9159d28d30e0f0d"
+  },
+  {
+    "path": "source/apps/rte_ridetube/main.js",
+    "status": "modified",
+    "sha256": "6d63dd29ecc4ae16d5141aecfeec02896233b67834c40cad3c9210ed635acf51"
+  },
+  {
+    "path": "source/apps/rte_ridetube/theme.js",
+    "status": "added",
+    "sha256": "a8ffca3f3479f2f9ef8d3331b5c11d71df73c0c55e8aa91d2b4502154b2ded73"
+  },
+  {
+    "path": "source/apps/rte_ridetube/yt.js",
+    "status": "modified",
+    "sha256": "74873ba2e697d220d8b3f082c159d428c9b59dbf749f04d8d0ea97601bf2d9bd"
+  },
+  {
+    "path": "source/kit/tools/test_ridetube.js",
+    "status": "modified",
+    "sha256": "5b620a88cf5308c630232f5214827f2cef3a373b76fe8ed69d7ac89fc9f395a3"
+  },
+  {
+    "path": "source/native/rte-ridetube-d/README.md",
+    "status": "modified",
+    "sha256": "d6cdaafe6cad0fb98073dbf45de50797e60e1559db7a7cf0765f66d9199c2255"
+  },
+  {
+    "path": "source/native/rte-ridetube-d/build.sh",
+    "status": "modified",
+    "sha256": "d5faaec42142e350b188c04144ed1f85d41cd2110b93af0025c1b420109f3964"
+  },
+  {
+    "path": "source/native/rte-ridetube-d/check.sh",
+    "status": "modified",
+    "sha256": "658809e4ac7dc9e51325dae1401802fa14fc5d6b09db2c116c82f3b8ed972210"
+  },
+  {
+    "path": "source/native/rte-ridetube-d/component.json",
+    "status": "modified",
+    "sha256": "1d36fe1a5b4a7982ced6ff4c5c1d6312933e3ceb1b6d5f1080eefe4a935f3af4"
+  },
+  {
+    "path": "source/native/rte-ridetube-d/diagnostics.js",
+    "status": "added",
+    "sha256": "f0e63818c0e5baff4cf1e6ae6289d27dc22f07f79dbe0d90570a371e059fd07e"
+  },
+  {
+    "path": "source/native/rte-ridetube-d/systemd/rte-ridetube-d.service",
+    "status": "modified",
+    "sha256": "f94bb66881809e5569c4f1a5ac15462f5965f7a746ce3af08d27b903ab3f46bf"
+  },
+  {
+    "path": "source/native/rte-ridetube-d/test/mgyi.py",
+    "status": "modified",
+    "sha256": "823deb2c95617f12b4d9db12d9d96d74d818cba80d89f94654c9053b8e18f8ab"
+  },
+  {
+    "path": "source/native/rte-ridetube-d/test/test_ytd.js",
+    "status": "modified",
+    "sha256": "9ecfced5e67ceb6b96eb3b2abb61f5e85cbe47fbf172b995086d5697954c6420"
+  },
+  {
+    "path": "source/native/rte-ridetube-d/test/test_ytfetch.py",
+    "status": "modified",
+    "sha256": "af93b9537637aedb509a8b06427193826986c5375758c6d1e7f79f027ce4aa28"
+  },
+  {
+    "path": "source/native/rte-ridetube-d/ytd.js",
+    "status": "modified",
+    "sha256": "8cca39f6552df0ab51370f9d133dc85e2d293247bdccdb56dfe0c2d204022fc1"
+  },
+  {
+    "path": "source/native/rte-ridetube-d/ytfetch.py",
+    "status": "modified",
+    "sha256": "27f62bea5609c7abe168e7166973e2a8db929d26793ee256ec4c88b62d9beb82"
+  },
+  {
+    "path": "source/native/ytdec/README.md",
+    "status": "modified",
+    "sha256": "9543f6d2e6cce6fb30d9080c5bd5cba21d275a2a8db55f71981873a313353012"
+  },
+  {
+    "path": "source/native/ytdec/src/index.cpp",
+    "status": "modified",
+    "sha256": "3817f53fb88faa144014d9b34c056a96c9154806ddff801e9b07e53127d85430"
+  },
+  {
+    "path": "source/native/ytdec/src/main.cpp",
+    "status": "modified",
+    "sha256": "dc467ae3364505dfaf3d47ccf4c6f2da9397aaf22608b46a8d357b68c2b4abd1"
+  },
+  {
+    "path": "source/native/ytdec/src/nal_reader.cpp",
+    "status": "modified",
+    "sha256": "462898847acc8728b19ba2cbbfc5bb7ad2dc837d5f523ddefaa771fff4ceb374"
+  },
+  {
+    "path": "source/native/ytdec/src/player.cpp",
+    "status": "modified",
+    "sha256": "9643fbe7350029a1247506283cb6ba1bacff21abcc72774244fdb001a9c509b8"
+  },
+  {
+    "path": "source/native/ytdec/src/player.h",
+    "status": "modified",
+    "sha256": "05b9d96bdd3047b2376ca6780604df48ff0bde0658e21b49b80872f50feb88f8"
+  },
+  {
+    "path": "source/tools/release.py",
+    "status": "modified",
+    "sha256": "3e708de8a365161f03280aece52562150f3a573d88377cd2fd4cbb8c5c5e02c9"
+  }
+]

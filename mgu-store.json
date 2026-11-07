@@ -1,0 +1,10 @@
+{
+  "apps": {
+    "iyt_app": {
+      "title": "iYT",
+      "description": "YouTube for BMW iDrive 7 with native audio and hardware H.264 video.",
+      "author": "athar66",
+      "icon": "iyt_app.png"
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "node": "/mnt/f/APPS/iDrive Toolkit/iYT/.tools/node-v22.23.0-linux-x64/bin/node",
+  "python3.12": null,
+  "g++": "/usr/bin/g++",
+  "make": "/usr/bin/make",
+  "docker": null,
+  "ffmpeg": "/usr/bin/ffmpeg",
+  "flock": "/usr/bin/flock",
+  "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.43",
+  "sdk_present": false,
+  "target_toolchain": "Ubuntu 18.04 amd64, GCC 7.5, glibc 2.27; pinned Dockerfile in source/native/ytdec/docker",
+  "local_sdk_required": false,
+  "sdk_source": "MGU Store stock donor on the head unit",
+  "store_package_ready": true,
+  "target_binaries_built": true,
+  "vehicle_connected": false
+}

@@ -1,0 +1,53 @@
+.......E.s....
+======================================================================
+ERROR: test_video_demux (__main__.Offline.test_video_demux)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/f/APPS/iDrive Toolkit/ridetube-enhanced/.tools/baseline/native/jap-ridetube-d/test/test_ytfetch.py", line 127, in test_video_demux
+    hdr = self.check_video(self.v, out, self.tmp)
+  File "/mnt/f/APPS/iDrive Toolkit/ridetube-enhanced/.tools/baseline/native/jap-ridetube-d/test/test_ytfetch.py", line 69, in check_video
+    st, pk, _ = mgyi.build_index(src_mp4, ref, ref_idx)
+                ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/f/APPS/iDrive Toolkit/ridetube-enhanced/.tools/baseline/native/jap-ridetube-d/test/mgyi.py", line 82, in build_index
+    st, pk = probe(mp4)
+             ~~~~~^^^^^
+  File "/mnt/f/APPS/iDrive Toolkit/ridetube-enhanced/.tools/baseline/native/jap-ridetube-d/test/mgyi.py", line 58, in probe
+    st = json.loads(subprocess.run(
+                    ~~~~~~~~~~~~~~^
+        [FFPROBE, '-v', 'error', '-select_streams', 'v:0', '-show_entries',
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+         'stream=width,height,r_frame_rate,time_base,start_pts', '-of', 'json', mp4],
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        check=True, capture_output=True, text=True).stdout)['streams'][0]
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/subprocess.py", line 555, in run
+    with Popen(*popenargs, **kwargs) as process:
+         ~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/subprocess.py", line 1039, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                        pass_fds, cwd, env,
+                        ^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+                        gid, gids, uid, umask,
+                        ^^^^^^^^^^^^^^^^^^^^^^
+                        start_new_session, process_group)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/subprocess.py", line 1875, in _execute_child
+    self._posix_spawn(args, executable, env, restore_signals, close_fds,
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                      p2cread, p2cwrite,
+                      ^^^^^^^^^^^^^^^^^^
+                      c2pread, c2pwrite,
+                      ^^^^^^^^^^^^^^^^^^
+                      errread, errwrite)
+                      ^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/subprocess.py", line 1819, in _posix_spawn
+    self.pid = os.posix_spawn(executable, args, env, **kwargs)
+               ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/opt/homebrew/bin/ffprobe'
+
+----------------------------------------------------------------------
+Ran 14 tests in 9.199s
+
+FAILED (errors=1, skipped=1)

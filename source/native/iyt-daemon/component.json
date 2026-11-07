@@ -1,0 +1,111 @@
+{
+  "id": "iyt-daemon",
+  "kind": "tool",
+  "version": "0.4.0",
+  "license": "GPL-3.0-or-later",
+  "title": "iYT playback service",
+  "description": "iYT native YouTube playback service: verified yt-dlp, BMW MediaPlayer audio and Intel H.264 decoder; independent of original RideTube.",
+  "requires": {
+    "mgu-deploy": "0.7.0",
+    "mgu-python": "1.0.2",
+    "jap-node22": "22.23.4",
+    "mgu-render": "0.6.11"
+  },
+  "uninstallable": true,
+  "internet": true,
+  "uids": "state/internet-uids",
+  "mguHmi": [
+    "ID7"
+  ],
+  "files": [
+    {
+      "path": "ytd.js",
+      "from": "ytd.js",
+      "mode": "0644"
+    },
+    {
+      "path": "ytdec",
+      "from": "prebuilt/ytdec",
+      "mode": "0755"
+    },
+    {
+      "path": "ytfetch.py",
+      "from": "ytfetch.py",
+      "mode": "0644"
+    },
+    {
+      "path": "ytdlp.pyz",
+      "from": "prebuilt/ytdlp.pyz",
+      "mode": "0644"
+    },
+    {
+      "path": "thumb.js",
+      "from": "thumb.js",
+      "mode": "0644"
+    },
+    {
+      "path": "vendor/jpeg-js/decoder.js",
+      "from": "vendor/jpeg-js/decoder.js",
+      "mode": "0644"
+    },
+    {
+      "path": "vendor/jpeg-js/LICENSE",
+      "from": "vendor/jpeg-js/LICENSE",
+      "mode": "0644"
+    },
+    {
+      "path": "check.sh",
+      "from": "check.sh",
+      "mode": "0755"
+    },
+    {
+      "path": "LICENSE",
+      "from": "LICENSE",
+      "mode": "0644"
+    },
+    {
+      "path": "THIRD_PARTY_LICENSES",
+      "from": "THIRD_PARTY_LICENSES",
+      "mode": "0644"
+    },
+    {
+      "path": "diagnostics.js",
+      "from": "diagnostics.js",
+      "mode": "0644"
+    },
+    {
+      "path": "extractor.json",
+      "from": "prebuilt/extractor.json",
+      "mode": "0644"
+    },
+    {
+      "path": "iyt-lock",
+      "from": "prebuilt/iyt-lock",
+      "mode": "0755"
+    }
+  ],
+  "check": [
+    "check.sh"
+  ],
+  "units": [
+    {
+      "name": "iyt-daemon.service",
+      "from": "systemd/iyt-daemon.service"
+    }
+  ],
+  "enable": [
+    {
+      "unit": "iyt-daemon.service",
+      "target": "multi-user.target"
+    }
+  ],
+  "crashNames": [
+    "ytdec"
+  ],
+  "recmgr": [
+    "iyt-daemon"
+  ],
+  "restart": [
+    "iyt-daemon.service"
+  ]
+}

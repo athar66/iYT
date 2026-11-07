@@ -1,0 +1,4 @@
+ok   ctl client + state machine
+skip app frames (python3 kit/tools/build.py jap_ridetube first)
+ok   channel search: a letter = the names starting with it, a word = the names (or handles) holding it
+ok   extras: Continue watching, positions, chapters, the skipped toast

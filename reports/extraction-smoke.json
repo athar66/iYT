@@ -1,0 +1,39 @@
+{
+  "content": "Blender Foundation public Big Buck Bunny test video",
+  "mediaDownloaded": false,
+  "code": 0,
+  "title": "Big Buck Bunny 60fps 4K - Official Blender Foundation Short Film",
+  "compatibleH264": [
+    {
+      "id": "160",
+      "height": 144,
+      "fps": 30
+    },
+    {
+      "id": "133",
+      "height": 240,
+      "fps": 30
+    },
+    {
+      "id": "134",
+      "height": 360,
+      "fps": 30
+    },
+    {
+      "id": "18",
+      "height": 360,
+      "fps": 30
+    },
+    {
+      "id": "135",
+      "height": 480,
+      "fps": 30
+    },
+    {
+      "id": "136",
+      "height": 720,
+      "fps": 30
+    }
+  ],
+  "aacLcAvailable": true
+}

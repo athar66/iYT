@@ -1,0 +1,9 @@
+  a static page at 60 fps for 2.5 s: 4 FRAMEs, longest gap 1012 ms
+  a static sheet for 1.5 s: 2 FRAMEs
+ok    unchanged frames: not sent again, but one a second (the renderer hides an app quiet for 3 s)
+ok    a sheet's press, back and touch target that throw: logged, the app runs on
+ok    not in front, then in front (not on screen yet) within 1.5 s: the app stays on the renderer
+ok    a connection cut in the middle of a message: the next connection's READY is read
+ok    the one-time move to the new default theme: a theme picked on a fresh install stays
+ok    a new scale keeps the uploads (the renderer keeps them), a new size sends them again
+runtime: all ok
