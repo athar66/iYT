@@ -36,7 +36,7 @@ ID_RE = re.compile(r'^[A-Za-z0-9_-]{11}$')
 HDR = struct.Struct('<4sHHHHHxxI12x')  # 32 bytes, record count at offset 16
 REC = struct.Struct('<IQIB')            # 17 bytes: pts_ms, pos, size, key
 CA = '/var/opt/mgu-python/current/ssl/cacert.pem'
-NODE = '/var/opt/jap-node22/current/bin/node'
+QJS = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'qjs')
 LEASE = '/run/mgu-uplink/lease.json'
 DEFAULT_CHECK_ID = 'dQw4w9WgXcQ'  # 3:33, avc1 720p 25 fps, AAC-LC 140: public and long-lived
 # the video's own language first where it has several tracks (no AI dub / translation): yt-dlp notes it "original"
@@ -711,7 +711,8 @@ def ydl_params(a, fmt, hook=None):
             'no_warnings': True, 'noplaylist': True, 'fixup': 'never', 'concurrent_fragment_downloads': 4,
             # the API's default is no retry: one 20 s stall (googlevideo pacing) ended the video; a retry resumes it
             'retries': 10, 'socket_timeout': 30,
-            'js_runtimes': {'node': {'path': a.node}}, 'remote_components': [],
+            'js_runtimes': ({'node': {'path': a.node}} if getattr(a, 'node', None)
+                            else {'quickjs': {'path': getattr(a, 'quickjs', QJS)}}), 'remote_components': [],
             'progress_hooks': [hook] if hook else []}
 
 
@@ -967,10 +968,12 @@ def check(a):
         line('tls robots.txt', False, t, e)
     t = time.monotonic()
     try:
-        v = subprocess.run([a.node, '--version'], capture_output=True, text=True, timeout=10).stdout.strip()
-        line('node', v.startswith('v') and int(v[1:].split('.')[0]) >= 22, t, f'{a.node} {v} (yt-dlp needs >= 22)')
+        cmd = [a.node, '--version'] if a.node else [a.quickjs, '-h']
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
+        v = (result.stdout + result.stderr).strip().splitlines()[0]
+        line('JavaScript runtime', result.returncode == 0, t, v)
     except (OSError, subprocess.SubprocessError) as e:
-        line('node', False, t, e)
+        line('JavaScript runtime', False, t, e)
     cache = os.path.join(work, 'ytdlp-cache')
     shutil.rmtree(cache, ignore_errors=True)
     a.cache_dir = cache
@@ -986,7 +989,7 @@ def check(a):
     shutil.rmtree(out, ignore_errors=True)
     os.makedirs(out)
     cmd = [sys.executable, '-I', os.path.abspath(__file__), 'fetch', vid, out, '--cache-dir', cache,
-           '--height', str(a.height), '--node', a.node, '--lease', a.lease] + (['--pyz', a.pyz] if a.pyz else [])
+           '--height', str(a.height), '--lease', a.lease] + (['--node', a.node] if a.node else ['--quickjs', a.quickjs]) + (['--pyz', a.pyz] if a.pyz else [])
     t = time.monotonic()
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE, text=True, env={}, cwd='/')
     t_audio = t_head = t_lead = t_dl = None  # t_dl: first progress event, after yt-dlp's 'sleep as required by the site'
@@ -1045,7 +1048,8 @@ def main(argv=None):
     ap.add_argument('dir', nargs='?')
     ap.add_argument('--cache-dir', required=True)
     ap.add_argument('--height', type=int, default=720)
-    ap.add_argument('--node', default=NODE)
+    ap.add_argument('--quickjs', default=QJS)
+    ap.add_argument('--node', default=None, help='Optional development runtime override')
     ap.add_argument('--lease', default=LEASE)
     ap.add_argument('--pyz')
     ap.add_argument('--uid', type=int)

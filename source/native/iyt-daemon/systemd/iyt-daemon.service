@@ -11,7 +11,7 @@ StartLimitBurst=5
 User=root
 ExecStartPre=-/bin/sh -c 'mkdir -p /var/opt/iyt-daemon/cache /var/opt/iyt-daemon/log /var/opt/iyt-daemon/state && chmod 0755 /var/opt/iyt-daemon && chmod 0711 /var/opt/iyt-daemon/cache && chmod 0700 /var/opt/iyt-daemon/state'
 # youtube.com/tv answers with 11 kB of headers; Node 8.14+ refuses more than 8 kB (HPE_HEADER_OVERFLOW)
-ExecStart=/var/opt/iyt-daemon/current/iyt-lock /run/iyt-daemon/instance.lock /var/opt/jap-node22/current/bin/node --max-http-header-size=65536 /var/opt/iyt-daemon/current/ytd.js
+ExecStart=/var/opt/iyt-daemon/current/iyt-lock /run/iyt-daemon/instance.lock /usr/bin/node --max-http-header-size=65536 /var/opt/iyt-daemon/current/ytd.js
 # The app (group tm_oap_app) must traverse the dir; ctl.sock itself is 0660 root:tm_oap_app.
 RuntimeDirectory=iyt-daemon
 RuntimeDirectoryMode=0755

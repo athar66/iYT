@@ -57,59 +57,64 @@
     "suite": "enhanced",
     "test": "test_runtime",
     "code": 0,
-    "duration_s": 11.985
+    "duration_s": 11.737
   },
   {
     "suite": "enhanced",
     "test": "test_life",
     "code": 0,
-    "duration_s": 0.337
+    "duration_s": 0.076
   },
   {
     "suite": "enhanced",
     "test": "test_parked",
     "code": 0,
-    "duration_s": 0.338
+    "duration_s": 0.071
   },
   {
     "suite": "enhanced",
     "test": "test_qr",
     "code": 0,
-    "duration_s": 0.45
+    "duration_s": 0.13
   },
   {
     "suite": "enhanced",
     "test": "test_ridetube",
     "code": 0,
-    "duration_s": 23.114
+    "duration_s": 22.808
   },
   {
     "suite": "enhanced",
     "test": "daemon",
     "code": 0,
-    "duration_s": 28.319
+    "duration_s": 28.092
   },
   {
     "suite": "enhanced",
     "test": "thumbnails",
     "code": 0,
-    "duration_s": 1.421
+    "duration_s": 0.668
   },
   {
     "suite": "enhanced",
     "test": "media",
     "code": 0,
-    "duration_s": 11.019
+    "duration_s": 9.947
   },
   {
     "suite": "enhanced",
     "test": "native",
     "code": 0,
-    "duration_s": 7.948
+    "duration_s": 1.672
   },
   {
     "suite": "enhanced",
     "test": "regressions",
+    "code": 0
+  },
+  {
+    "suite": "enhanced",
+    "test": "network-dns",
     "code": 0
   },
   {
@@ -125,31 +130,6 @@
   {
     "suite": "enhanced",
     "test": "router",
-    "code": 0
-  },
-  {
-    "suite": "deployment",
-    "test": "store-discovery",
-    "code": 0
-  },
-  {
-    "suite": "deployment",
-    "test": "store-sdk-donor",
-    "code": 0
-  },
-  {
-    "suite": "deployment",
-    "test": "target-abi",
-    "code": 0
-  },
-  {
-    "suite": "deployment",
-    "test": "service-lock",
-    "code": 0
-  },
-  {
-    "suite": "deployment",
-    "test": "live-extraction-metadata",
     "code": 0
   }
 ]

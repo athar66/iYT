@@ -1,5 +1,6 @@
 {
   "content": "Blender Foundation public Big Buck Bunny test video",
+  "runtime": "bundled QuickJS target binary via host loader",
   "mediaDownloaded": false,
   "code": 0,
   "title": "Big Buck Bunny 60fps 4K - Official Blender Foundation Short Film",

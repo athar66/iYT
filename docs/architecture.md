@@ -2,7 +2,7 @@
 
 `source/apps/iyt_app`: original BMW-native Node 8-compatible canvas, speller and controller model, revised graphite theme, diagnostic menu. No web runtime added.
 
-`source/native/iyt-daemon`: Node22 service retains working account/feed/search, cancellation generations, bounded child restart, BMW SOME/IP calls and audio clock; Python fetcher progressively demuxes H.264 and prepares playable audio prefixes. Diagnostics/error categorisation extracted to a tested module. Existing legacy state protocol is retained. A complete replacement state machine with all twelve requested states is outstanding.
+`source/native/iyt-daemon`: platform-Node8 bridge handles account/feed/search, cancellation generations, bounded child restart, BMW SOME/IP calls and audio clock. It uses the runtime already supplied by iDrive for native addon compatibility. The Python fetcher progressively demuxes H.264 and prepares playable audio prefixes; bundled QuickJS handles extraction challenges on demand. No Node22 dependency or default idle Python worker is retained. Existing legacy state protocol remains; a complete twelve-state replacement is outstanding.
 
 `source/native/ytdec`: one Intel MSDK/VAAPI decoder, timestamp-based presentation, reused frame surfaces, bounded queue and triple-slot MGVF writer. Added parser/index allocation limits and synchronous presentation routing hook. Production uses existing main-screen path.
 

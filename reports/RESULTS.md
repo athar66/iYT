@@ -19,3 +19,11 @@ Actual MGU Store repoCatalog/packComponent discovers both iYT components and pac
 A live metadata-only smoke test of the public Blender Foundation Big Buck Bunny video passed with the shipped, hash-verified yt-dlp zipapp: compatible H.264 up to 720p30 and AAC-LC were available. No media downloaded. This does not establish on-car playback performance.
 
 See release-validation.json, store-discovery.json, store-sdk-link.json and extraction-smoke.json. No vehicle installation was performed.
+
+## Version 0.4.1
+
+- Reproduced the previous scalar DNS callback failure as ERR_INVALID_IP_ADDRESS: Invalid IP address: undefined under Node22. Shared lookup now supports the requested result shape and validates DNS answers.
+- TV-page HTTP requests through uplink DNS pass under Node8.16.2 and Node22. Account/device-code flow tests pass against controlled fixtures; actual vehicle sign-in remains unverified.
+- All 14 enhanced groups and all four Node8 platform-compatibility groups pass. The full online media-download regression remains skipped; live public-content metadata extraction passes using the bundled QuickJS target interpreter.
+- Service uses the platform Node8 bridge, with no jap-node22 dependency. Native QuickJS is bundled and invoked on demand. The default idle Python worker is disabled. This is not a completely Node-free implementation and no vehicle CPU/RAM improvement is claimed.
+- QuickJS source archive, pinned digest and MIT licence are included. Target loader/library checks pass for the interpreter.

@@ -1,10 +1,12 @@
 * text=auto eol=lf
 *.png binary
 *.pyz binary
+*.xz binary
 *.tgz binary
 *.tar.gz binary
 source/native/iyt-daemon/prebuilt/ytdec binary
 source/native/iyt-daemon/prebuilt/iyt-lock binary
+source/native/iyt-daemon/prebuilt/qjs binary
 # Preserve exact published bytes, including catalog and checksum text files.
 dist/release/* -text
 reports/published-catalog.json -text

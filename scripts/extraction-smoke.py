@@ -3,15 +3,19 @@ from pathlib import Path
 import json
 import subprocess
 import sys
+import shlex
 r = Path(__file__).resolve().parents[1]
+wrapper = r/'.tools/qjs-host'
+wrapper.write_text('#!/bin/sh\nexec /lib64/ld-linux-x86-64.so.2 '+shlex.quote(str(r/'source/native/iyt-daemon/prebuilt/qjs'))+' "$@"\n')
+wrapper.chmod(0o755)
 command = [sys.executable, str(r/'source/native/iyt-daemon/prebuilt/ytdlp.pyz'),
     '--skip-download', '--dump-single-json', '--no-playlist', '--no-remote-components',
-    '--js-runtimes', 'node:'+str(r/'.tools/node-v22.23.0-linux-x64/bin/node'),
+    '--js-runtimes', 'quickjs:'+str(wrapper),
     '--socket-timeout', '10', '--retries', '1', '--extractor-retries', '1',
     'https://www.youtube.com/watch?v=aqz-KE-bpKQ']
 try:
     result = subprocess.run(command, capture_output=True, text=True, timeout=60)
-    report = {'content': 'Blender Foundation public Big Buck Bunny test video', 'mediaDownloaded': False, 'code': result.returncode}
+    report = {'content': 'Blender Foundation public Big Buck Bunny test video', 'runtime': 'bundled QuickJS target binary via host loader', 'mediaDownloaded': False, 'code': result.returncode}
     if result.returncode == 0:
         info = json.loads(result.stdout)
         report['title'] = info.get('title')

@@ -45,7 +45,7 @@ assert.throws(() => thumbRgba(Buffer.from('<html>not a jpeg</html>')));
 
 const cli = (args) => spawnSync(process.execPath, [path.join(__dirname, '..', 'thumb.js')].concat(args), { env: {}, cwd: '/', maxBuffer: 1 << 22 });
 let r = cli(['bad']);
-assert.strictEqual(r.status, 1); assert.strictEqual(r.stdout.length, 0); assert.match(r.stderr.toString(), /^thumb: bad id\n$/);
+assert.strictEqual(r.status, 1); assert.strictEqual(r.stdout.length, 0); assert.ok(/^thumb: bad id\n$/.test(r.stderr.toString()));
 console.log('ok bad id');
 
 require('dns').lookup('i.ytimg.com', (e) => {
@@ -55,8 +55,8 @@ require('dns').lookup('i.ytimg.com', (e) => {
     assert.strictEqual(r.stdout.length, 230400);
     console.log('ok online dQw4w9WgXcQ');
     r = cli(['AAAAAAAAAAA']); // no such video: 404 placeholder
-    assert.strictEqual(r.status, 1); assert.strictEqual(r.stdout.length, 0); assert.match(r.stderr.toString(), /^thumb: http 404\n$/);
+    assert.strictEqual(r.status, 1); assert.strictEqual(r.stdout.length, 0); assert.ok(/^thumb: http 404\n$/.test(r.stderr.toString()));
     console.log('ok online 404');
     done();
 });
-function done() { fs.rmSync(tmp, { recursive: true, force: true }); console.log('test_thumb: all ok'); }
+function done() { fs.readdirSync(tmp).forEach(name => fs.unlinkSync(path.join(tmp, name))); fs.rmdirSync(tmp); console.log('test_thumb: all ok'); }

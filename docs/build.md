@@ -1,6 +1,6 @@
 # Build and publishing
 
-Development uses WSL2 Linux. Node packages are not needed. Run `sh scripts/setup-node.sh` for the pinned Node22 host runtime, then `python3 scripts/fetch-upstream.py` to restore the public test/build repositories listed in upstream-lock.json if they are absent.
+Development uses WSL2 Linux. Node packages are not needed. Run `sh scripts/setup-node.sh` for the pinned Node22 host test runtime (not a deployment dependency), then `python3 scripts/fetch-upstream.py` to restore the public test/build repositories listed in upstream-lock.json if they are absent.
 
 Run `python3 source/kit/tools/build.py iyt_app` to build the native app. **No local BMW SDK is required.** If source/oap-sdk is absent, the package intentionally omits it and the Store supplies it from a stock donor on the head unit. A repo-tree installation asks the Store to supply source/oap-sdk to the writable build copy; that generated SDK is never committed or published.
 
@@ -19,3 +19,5 @@ With the local Node22 directory on PATH:
 Commit mgu-repo.json, source and prebuilt payloads to main. Users can then add athar66/iYT and choose main. For the Releases channel, upload every dist/release file to a non-draft GitHub release tagged catalog. Catalog URLs are already set to https://github.com/athar66/iYT/releases/download/catalog/.
 
 No publication script installs to a vehicle. Release packages contain no SDK, link-only stubs or simulator binaries.
+
+QuickJS is rebuilt with scripts/build-quickjs.py in the same pinned target userland. Its complete source archive and digest are committed under native/quickjs. Run scripts/setup-node8-test.sh and scripts/bridge-tests.py to exercise the service against the platform runtime version.

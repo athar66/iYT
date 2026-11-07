@@ -1,5 +1,5 @@
 'use strict';
-// node22 thumb.js <id> [--lease <path>]: i.ytimg.com's mqdefault.jpg as 320x180 RGBA (230400 bytes) on stdout.
+// thumb.js <id> [--lease <path>]: i.ytimg.com's mqdefault.jpg as 320x180 RGBA (230400 bytes) on stdout.
 // Runs as the fetch uid (env {}, cwd /); the car has no image library, so the JPEG is decoded here.
 const https = require('https');
 const decode = require('./vendor/jpeg-js/decoder.js');
@@ -7,17 +7,7 @@ const decode = require('./vendor/jpeg-js/decoder.js');
 const W = 320, H = 180, MAX = 2 * 1024 * 1024, TIMEOUT_MS = 8000;
 
 // as ytd.js's uplinkLookup (Node 8 there); Node 22's autoSelectFamily asks with {all: true}
-function uplinkLookup(leaseFile) {
-    let servers = [];
-    try { servers = (JSON.parse(require('fs').readFileSync(leaseFile || '/run/mgu-uplink/lease.json', 'utf8')).dns || []).filter((x) => typeof x === 'string'); } catch (e) { /* no lease: system resolver */ }
-    if (!servers.length) return undefined;
-    const r = new (require('dns').Resolver)();
-    r.setServers(servers);
-    return function (host, opts, cb) {
-        if (typeof opts === 'function') { cb = opts; opts = {}; }
-        r.resolve4(host, (e, a) => (e ? cb(e) : opts.all ? cb(null, a.map((address) => ({ address, family: 4 }))) : cb(null, a[0], 4)));
-    };
-}
+const uplinkLookup = require('./network').uplinkLookup;
 
 function fetchJpeg(id, lookup) {
     return new Promise((resolve, reject) => {

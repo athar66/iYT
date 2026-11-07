@@ -9,6 +9,17 @@ const net = require('net');
 const { Daemon, pruneCache, listCache, feedItems, feedShelves, pickFetchUid, fetchRequest, isPlayable } = require('../ytd.js');
 
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'ytd-'));
+function removeFixture(directory) {
+    const target = path.resolve(directory);
+    assert.ok(target.indexOf(tmp + path.sep) === 0, 'cleanup stays inside this test fixture');
+    if (!fs.existsSync(target)) return;
+    fs.readdirSync(target).forEach(function (name) {
+        const child = path.join(target, name);
+        if (fs.lstatSync(child).isDirectory()) removeFixture(child);
+        else fs.unlinkSync(child);
+    });
+    fs.rmdirSync(target);
+}
 const cache = path.join(tmp, 'cache');
 const srcGen = path.join(tmp, 'src-gen');
 const ytlog = path.join(tmp, 'ytdec.calls');
@@ -475,7 +486,7 @@ async function main() {
         c.send({ cmd: 'stop' });
         await c.waitFor((x) => x.ev === 'state' && x.state === 'idle');
         d.opts.resume = false;
-        fs.rmSync ? fs.rmSync(dir, { recursive: true }) : null;
+        removeFixture(dir);
     });
 
     await t('SponsorBlock: the play\'s skip list; other categories (outro) only in extras, for the app\'s Skip button', async () => {
@@ -498,7 +509,7 @@ async function main() {
         assert.strictEqual(sk.category, 'outro');
         c.send({ cmd: 'stop' });
         await c.waitFor((x) => x.ev === 'state' && x.state === 'idle');
-        fs.rmSync(dir, { recursive: true, force: true });
+        removeFixture(dir);
     });
 
     await t('fetcher error before playable -> error state + "fetch: <msg>", nothing played', async () => {
@@ -521,7 +532,7 @@ async function main() {
         assert.ok(!c.evs.some((x) => x.ev === 'state' && x.state === 'error'), 'no error on the way');
         d.opts.fetchRetryMs = [];
         c.send({ cmd: 'stop' }); await c.waitFor((x) => x.ev === 'state' && x.state === 'idle');
-        fs.rmSync(path.join(cache, 'FFFFFFFFFR4'), { recursive: true, force: true });
+        removeFixture(path.join(cache, 'FFFFFFFFFR4'));
     });
 
     await t('a refused video (unavailable) is not retried', async () => {
@@ -628,6 +639,7 @@ async function main() {
         assert.strictEqual(d.elapsed, 58600);
         assert.ok(!c.evs.some((x) => x.ev === 'state' && x.state === 'ended'));
         assert.strictEqual(ours().length, 1);
+        await waitUntil(() => ytdecIns().indexOf('in pause') >= 0);
         assert.deepStrictEqual(ytdecIns(), ['in pause']);
         fs.writeFileSync(ctl, 'done'); // all of it: past the 12 s of video fetched, buffering ends with the fetch
         await c.waitFor((x) => x.ev === 'state' && x.state === 'playing' && x.buffering === false);
@@ -1237,7 +1249,7 @@ async function main() {
         assert.ok(/st=60&et=60&final=1$/.test(yt.calls.filter((x) => /watchtime/.test(x.url)).pop().url));
         await c.waitFor((x) => x.ev === 'state' && x.state === 'ended');
         d.account = saved;
-        fs.rmSync(path.join(cache, id), { recursive: true, force: true });
+        removeFixture(path.join(cache, id));
     });
 
     await t('feed tiles carry the account\'s watched share and resume point', async () => {

@@ -16,6 +16,7 @@ const crypto = require('crypto');
 const cp = require('child_process');
 const readline = require('readline');
 const diagnostics = require('./diagnostics');
+const uplinkLookup = require('./network').uplinkLookup;
 
 const ID_RE = /^[A-Za-z0-9_-]{11}$/;
 const SOURCE_ID = 1046, SINK_ID = 1024;
@@ -45,10 +46,10 @@ function defaults() {
         mainapps: MAINAPPS,
         fetchCmd: [process.execPath, '--max-http-header-size=65536', __filename, '--fetch'],
         fetcher: ['/var/opt/mgu-python/current/bin/python3', path.join(here, 'ytfetch.py')],
-        thumbCmd: ['/var/opt/jap-node22/current/bin/node', path.join(here, 'thumb.js')],
+        thumbCmd: [process.execPath, path.join(here, 'thumb.js')],
         startVideoMs: 6000,  // video fetched ahead before playback starts (later the buffering pause covers a slow link)
         fetchRetryMs: [3000, 8000], // a fetch failing before playback (the network): tried again after these waits
-        spare: true,         // keep a ytfetch.py serve (yt-dlp loaded) waiting while the app is in use
+        spare: false,        // start extraction on demand; do not retain an idle Python worker
         warmMs: 600000,      // ... for this long after the app's last command
         infoMaxMs: 1500000,
         leaseFile: '/run/mgu-uplink/lease.json',
@@ -1122,7 +1123,7 @@ Daemon.prototype.thumb = async function (id) {
     const read = (f) => { try { return fs.readFileSync(f); } catch (e) { return null; } };
     let data = read(path.join(this.opts.cacheDir, id, 'thumb.rgba')) || read(tf);
     if (!data) {
-        // at most 3 helpers at once: each is a Node 22 process, and a page asks for 20 thumbs
+        // At most three short-lived thumbnail helpers; the page can request many images.
         const i = this.thumbN++ % this.thumbQ.length;
         const p = this.thumbQ[i].then(() => this.thumbFetch(id));
         this.thumbQ[i] = p.catch(() => {});
@@ -1644,17 +1645,6 @@ module.exports = { qualityHeight: qualityHeight, channelTiles: channelTiles, Dae
 
 // the uplink's DNS servers (its lease): the system resolver (127.0.0.1) answers no internet names. No
 // lease (uplink down or not installed): the system resolver, as before
-function uplinkLookup(leaseFile) {
-    const servers = ((readJson(leaseFile || '/run/mgu-uplink/lease.json') || {}).dns || []).filter((x) => typeof x === 'string');
-    if (!servers.length) return undefined;
-    const r = new (require('dns').Resolver)();
-    r.setServers(servers);
-    return function (host, opts, cb) {
-        if (typeof opts === 'function') cb = opts;
-        r.resolve4(host, (e, a) => (e ? cb(e) : cb(null, a[0], 4)));
-    };
-}
-
 if (require.main === module && process.argv[2] === '--fetch') {
     // the fetch helper (as the fetch uid): one request from stdin, its answer on stdout
     let input = '';

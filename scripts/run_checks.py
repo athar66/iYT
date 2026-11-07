@@ -7,7 +7,8 @@ import subprocess
 import time
 
 r = Path(__file__).resolve().parents[1]
-os.environ['PATH'] = str(r / '.tools/node-v22.23.0-linux-x64/bin') + ':' + os.environ['PATH']
+cached=Path('/home/athar/.cache/iyt-host-tools/node22-bin')
+os.environ['PATH'] = str(cached if (cached/'node').exists() else r/'.tools/node-v22.23.0-linux-x64/bin') + ':' + os.environ['PATH']
 reports = r / 'reports'
 reports.mkdir(exist_ok=True)
 baseline = r / '.tools/baseline'
@@ -36,6 +37,7 @@ for name, tree, daemon in [('baseline', baseline, 'jap-ridetube-d'), ('enhanced'
         print(json.dumps(entry), flush=True)
         (reports/'checks.json').write_text(json.dumps(results, indent=2)+'\n')
 for name, cmd in [('regressions', ['python3', str(r/'tests/reliability_test.py')]),
+                  ('network-dns', ['node', str(r/'tests/network-regression.js')]),
                   ('updater', ['python3', str(r/'tests/updater_test.py')]),
                   ('diagnostics', ['node', '--test', str(r/'tests/diagnostics.test.js')]),
                   ('router', ['sh', str(r/'scripts/native-tests.sh')])]:

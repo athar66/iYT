@@ -4,7 +4,7 @@ For private repositories, give the Store's GitHub connection access to athar66/i
 
 Add athar66/iYT in Store → Sources, choose Releases, refresh, then select iYT → Install. The published catalog release contains the SDK-free app, native service, icon and checked artifact metadata. The Store supplies the SDK from its stock BMW donor. You do not download, extract or supply a BMW SDK yourself.
 
-If jap-node22 is missing from available dependencies, add JustAnotherPU/mgu-apps as a Releases source. Leave the standard Store/default application sources enabled for mgu-deploy, mgu-python, mgu-render and mgu-inputgate.
+Version 0.4.1 bundles QuickJS and does not require jap-node22. Leave the standard Store/default application sources enabled for mgu-deploy, mgu-python, mgu-render and mgu-inputgate. An existing Node22 installation can remain if another app uses it.
 
 Both routes are published: Releases reads the catalog release; main reads mgu-repo.json and builds the app on the head unit. Private release artifact URLs use the authenticated GitHub asset API.
 

@@ -18,7 +18,7 @@ iYT combines an iDrive interface with BMW's native audio playback and Intel hard
 - BMW MGU head unit running iDrive 7 (ID7).
 - MGU Store and a working internet connection through `mgu-uplink`.
 - The standard Store sources and `cauliflowermossgrape/idrive7-apps`.
-- `JustAnotherPU/mgu-apps` as a Releases source for the Node.js 22 runtime.
+- QuickJS is bundled for on-demand extraction; no separate Node.js 22 runtime is required.
 
 Required service and runtime dependencies are declared in the package manifests and installed by the Store when available.
 

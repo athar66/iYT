@@ -1,6 +1,6 @@
 {
   "name": "iYT",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "checks": [
     "iyt_app: size and SHA256 verified",
     "iyt-daemon: size and SHA256 verified",
@@ -8,6 +8,7 @@
     "service manifest, bundled lock, unit and every payload digest verified; no link stubs shipped",
     "ytdec: /mnt/f/APPS/iDrive Toolkit/iYT/source/native/iyt-daemon/prebuilt/ytdec: ok",
     "iyt-lock: /mnt/f/APPS/iDrive Toolkit/iYT/source/native/iyt-daemon/prebuilt/iyt-lock: ok",
+    "qjs: /mnt/f/APPS/iDrive Toolkit/iYT/source/native/iyt-daemon/prebuilt/qjs: ok",
     "OK    /mnt/f/APPS/iDrive Toolkit/iYT/source/native/iyt-daemon/prebuilt/ytdec: 18 checked imports, all exported by the unit's libraries"
   ],
   "hardwareValidated": false,
