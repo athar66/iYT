@@ -14,15 +14,15 @@ foreach ($line in $credentialText) {
 $headers = @{Authorization=('Bearer '+$fields['password']);Accept='application/vnd.github+json';'X-GitHub-Api-Version'='2022-11-28'}
 try {
     $repo = Invoke-RestMethod -Headers $headers "https://api.github.com/repos/$repoName"
-    if (-not $repo.private) { throw 'This publisher supports private repositories only' }
-    $existing = @(Invoke-RestMethod -Headers $headers "https://api.github.com/repos/$repoName/releases")
-    $catalogRelease = @($existing | Where-Object tag_name -eq 'catalog')
-    if ($catalogRelease.Count -and -not $UpdateCatalog) { throw 'Use -UpdateCatalog to update the existing release while preserving its previous assets' }
+    $catalogRelease = $null
+    try { $catalogRelease = Invoke-RestMethod -Headers $headers "https://api.github.com/repos/$repoName/releases/tags/catalog" }
+    catch { if ([int]$_.Exception.Response.StatusCode -ne 404) { throw } }
+    if ($catalogRelease -and -not $UpdateCatalog) { throw 'Use -UpdateCatalog to update the existing release while preserving its previous assets' }
     $body = @{
         tag_name='catalog';target_commitish='main';name='iYT 0.4.1';draft=$true;prerelease=$false
         body="iYT 0.4.1 fixes the sign-in DNS callback error (Invalid IP address: undefined), restores the platform Node8 bridge for BMW native-addon compatibility, removes the jap-node22 dependency, bundles target-ABI-checked QuickJS for on-demand extraction and disables the idle Python extraction worker. The bridge still uses iDrive's existing Node runtime; this is not a completely Node-free service. DNS regression, platform bridge/account tests, TV-page uplink requests and live QuickJS extraction metadata checks passed. Update both iYT and iYT playback service through MGU Store. Real-vehicle sign-in and playback require verification; real cluster video remains disabled. Previous package assets are retained for rollback. Source and licences are in the repository."
     } | ConvertTo-Json
-    $release = if ($catalogRelease.Count) { $catalogRelease[0] } else { Invoke-RestMethod -Method Post -Headers $headers -ContentType 'application/json' -Body $body "https://api.github.com/repos/$repoName/releases" }
+    $release = if ($catalogRelease) { $catalogRelease } else { Invoke-RestMethod -Method Post -Headers $headers -ContentType 'application/json' -Body $body "https://api.github.com/repos/$repoName/releases" }
     $uploadBase = ($release.upload_url -split '\{')[0]
     $assets = @{}
     foreach ($name in @('iyt_app@0.4.1.tgz','iyt-daemon@0.4.1.tgz','iyt_app.png','mgu-store.json')) {
@@ -37,10 +37,10 @@ try {
         $asset = Invoke-RestMethod -Method Post -Headers $headers -ContentType 'application/octet-stream' -InFile $file ($uploadBase+'?name='+[uri]::EscapeDataString($name))
         $assets[$name] = $asset
     }
-    # Private catalog artifacts must use the authenticated asset API URL.
+    # Match artifact URLs to the repository's current visibility; never change it.
     $catalogPath = Join-Path $releaseDir 'catalog.json'
     $catalog = Get-Content -LiteralPath $catalogPath -Raw | ConvertFrom-Json
-    foreach ($component in $catalog.components) { $component.artifact.url = $assets[$component.artifact.name].url }
+    foreach ($component in $catalog.components) { $component.artifact.url = if ($repo.private) { $assets[$component.artifact.name].url } else { $assets[$component.artifact.name].browser_download_url } }
     [IO.File]::WriteAllText($catalogPath, (($catalog | ConvertTo-Json -Depth 16)+"`n"), [Text.UTF8Encoding]::new($false))
     $hashLines = foreach ($file in Get-ChildItem -LiteralPath $releaseDir -File | Where-Object Name -ne 'SHA256SUMS' | Sort-Object Name) {
         (Get-FileHash -LiteralPath $file.FullName -Algorithm SHA256).Hash.ToLowerInvariant()+'  '+$file.Name
@@ -65,11 +65,11 @@ try {
     }
     $published = Invoke-RestMethod -Method Patch -Headers $headers -ContentType 'application/json' -Body (($body | ConvertFrom-Json | Select-Object name,body,@{n='draft';e={$false}}) | ConvertTo-Json) $release.url
     $record = @{
-        repository=$repoName;private=$true;tag=$published.tag_name;releaseUrl=$published.html_url
+        repository=$repoName;private=$repo.private;tag=$published.tag_name;releaseUrl=$published.html_url
         assets=@($published.assets | Select-Object name,size,url);vehicleDeployed=$false
     } | ConvertTo-Json -Depth 8
     [IO.File]::WriteAllText((Join-Path $project 'reports/published-release.json'), ($record+"`n"), [Text.UTF8Encoding]::new($false))
-    Write-Output "Published private catalog release: $($published.html_url)"
+    Write-Output "Published catalog release: $($published.html_url)"
 } finally {
     Remove-Variable credentialText,fields,headers -ErrorAction SilentlyContinue
 }

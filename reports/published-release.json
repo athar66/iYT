@@ -1,15 +1,24 @@
 {
-  "vehicleDeployed": false,
   "assets": [
     {
-      "name": "catalog.json",
+      "name": "catalog-archive-720860955.json",
       "size": 1657,
       "url": "https://api.github.com/repos/athar66/iYT/releases/assets/720860955"
+    },
+    {
+      "name": "catalog.json",
+      "size": 1633,
+      "url": "https://api.github.com/repos/athar66/iYT/releases/assets/721917628"
     },
     {
       "name": "iyt-daemon@0.4.0.tgz",
       "size": 3362910,
       "url": "https://api.github.com/repos/athar66/iYT/releases/assets/720860897"
+    },
+    {
+      "name": "iyt-daemon@0.4.1.tgz",
+      "size": 3859436,
+      "url": "https://api.github.com/repos/athar66/iYT/releases/assets/721917583"
     },
     {
       "name": "iyt_app.png",
@@ -22,18 +31,29 @@
       "url": "https://api.github.com/repos/athar66/iYT/releases/assets/720860875"
     },
     {
+      "name": "iyt_app@0.4.1.tgz",
+      "size": 1177810,
+      "url": "https://api.github.com/repos/athar66/iYT/releases/assets/721917560"
+    },
+    {
       "name": "mgu-store.json",
       "size": 213,
       "url": "https://api.github.com/repos/athar66/iYT/releases/assets/720860932"
     },
     {
       "name": "SHA256SUMS",
+      "size": 580,
+      "url": "https://api.github.com/repos/athar66/iYT/releases/assets/721917678"
+    },
+    {
+      "name": "SHA256SUMS-720860974",
       "size": 409,
       "url": "https://api.github.com/repos/athar66/iYT/releases/assets/720860974"
     }
   ],
   "tag": "catalog",
+  "vehicleDeployed": false,
   "repository": "athar66/iYT",
-  "releaseUrl": "https://github.com/athar66/iYT/releases/tag/catalog",
-  "private": true
+  "private": false,
+  "releaseUrl": "https://github.com/athar66/iYT/releases/tag/catalog"
 }
