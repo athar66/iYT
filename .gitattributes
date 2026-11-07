@@ -5,3 +5,6 @@
 *.tar.gz binary
 source/native/iyt-daemon/prebuilt/ytdec binary
 source/native/iyt-daemon/prebuilt/iyt-lock binary
+# Preserve exact published bytes, including catalog and checksum text files.
+dist/release/* -text
+reports/published-catalog.json -text
