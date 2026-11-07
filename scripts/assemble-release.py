@@ -26,9 +26,15 @@ with tarfile.open(app) as source, (out/app.name).open('wb') as f, gzip.GzipFile(
 shutil.copy2(r/'source/apps/iyt_app/icon.png', out/'iyt_app.png')
 shutil.copy2(r/'mgu-store.json', out/'mgu-store.json')
 base = 'https://github.com/athar66/iYT/releases/download/catalog/'
+published = r/'reports/published-release.json'
+private_urls = {}
+if published.exists():
+    record = json.loads(published.read_text())
+    if record.get('private') and record.get('repository') == 'athar66/iYT':
+        private_urls = {a['name']: a['url'] for a in record.get('assets', [])}
 def artifact(name):
     data = (out/name).read_bytes()
-    return {'name': name, 'size': len(data), 'sha256': hashlib.sha256(data).hexdigest(), 'url': base+name}
+    return {'name': name, 'size': len(data), 'sha256': hashlib.sha256(data).hexdigest(), 'url': private_urls.get(name, base+name)}
 service = json.loads((r/'source/native/iyt-daemon/component.json').read_text())
 app_entry = {'id': 'iyt_app', 'kind': 'app', 'version': '0.4.0', 'title': 'iYT',
     'description': 'YouTube for BMW iDrive 7: search, signed-in shelves, native audio and hardware H.264 video.',

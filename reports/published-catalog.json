@@ -1,0 +1,52 @@
+{
+  "schema": 2,
+  "components": [
+    {
+      "id": "iyt_app",
+      "kind": "app",
+      "version": "0.4.0",
+      "title": "iYT",
+      "description": "YouTube for BMW iDrive 7: search, signed-in shelves, native audio and hardware H.264 video.",
+      "mguHmi": [
+        "ID7"
+      ],
+      "uninstallable": true,
+      "requires": {
+        "iyt-daemon": "0.4.0",
+        "mgu-render": "0.6.11",
+        "mgu-inputgate": "1.0.0"
+      },
+      "artifact": {
+        "name": "iyt_app@0.4.0.tgz",
+        "size": 1177810,
+        "sha256": "08f42e8e86e1203fd836b782abc941f4dd1d042edfdd26964973d19d8a749d8c",
+        "url": "https://api.github.com/repos/athar66/iYT/releases/assets/720860875"
+      },
+      "icon": "iyt_app.png",
+      "iconSha256": "afbf63c28de964d4f249f062bdbddf853fe1e676cc8d62f59028ea0f1c6a9876"
+    },
+    {
+      "id": "iyt-daemon",
+      "kind": "tool",
+      "version": "0.4.0",
+      "title": "iYT playback service",
+      "description": "iYT native YouTube playback service: verified yt-dlp, BMW MediaPlayer audio and Intel H.264 decoder; independent of original RideTube.",
+      "requires": {
+        "mgu-deploy": "0.7.0",
+        "mgu-python": "1.0.2",
+        "jap-node22": "22.23.4",
+        "mgu-render": "0.6.11"
+      },
+      "mguHmi": [
+        "ID7"
+      ],
+      "uninstallable": true,
+      "artifact": {
+        "name": "iyt-daemon@0.4.0.tgz",
+        "size": 3362910,
+        "sha256": "3e02366ff7487df47790b7773df81118a3ad93539b5fb507712a36153bc89a72",
+        "url": "https://api.github.com/repos/athar66/iYT/releases/assets/720860897"
+      }
+    }
+  ]
+}

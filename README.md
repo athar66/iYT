@@ -4,7 +4,7 @@ Native YouTube app for BMW MGU iDrive 7, derived from RideTube. Includes native 
 
 ## Install from MGU Store
 
-Add **athar66/iYT** as a source and select the **main branch**. The repository's `mgu-repo.json` lists **iYT** and **iYT playback service**. Install iYT; the Store installs its declared dependencies first. If the Store offers Releases, that channel uses the `catalog` release and requires its assets to have been published; main works directly from this repository.
+The repository is **private**, as requested. Give MGU Store GitHub access to athar66/iYT first (through its GitHub account connection with this repository allowed, or a suitably restricted token). Add **athar66/iYT** as a source, select **Releases**, then install **iYT**. The published `catalog` release lists **iYT** and **iYT playback service** with authenticated asset URLs. The Store installs declared dependencies first. The **main branch** is also supported through root `mgu-repo.json`.
 
 The required Node22 runtime is published by **JustAnotherPU/mgu-apps**. Add that repository's Releases source if it is not already available. Standard Store sources supply mgu-deploy, mgu-python and mgu-render; mgu-inputgate comes from cauliflowermossgrape/idrive7-apps.
 
