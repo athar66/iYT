@@ -13,7 +13,7 @@ foreach ($line in $credentialText) {
 $headers = @{Authorization=('Bearer '+$fields['password']);Accept='application/vnd.github+json';'X-GitHub-Api-Version'='2022-11-28'}
 try {
     $repo = Invoke-RestMethod -Headers $headers "https://api.github.com/repos/$repoName"
-    if (-not $repo.private) { throw 'This publisher is restricted to the private repository requested by the owner' }
+    if (-not $repo.private) { throw 'This publisher supports private repositories only' }
     $existing = @(Invoke-RestMethod -Headers $headers "https://api.github.com/repos/$repoName/releases")
     if (@($existing | Where-Object tag_name -eq 'catalog').Count) { throw 'A catalog release already exists; inspect it before updating' }
     $body = @{

@@ -1,6 +1,6 @@
 # Source audit and issue matrix
 
-Audited snapshots are pinned in `upstream-lock.json`. `upstream/` retains the three actual Git repositories; `source/` is the editable GPL fork. Raw GitHub open issue snapshots are in `reports/*-issues.json`; these may include PRs. RideTube issue 1 reports service startup failure on a 2020 M340i. Its root cause cannot be established without logs from that firmware. Do not label it fixed.
+Audited revisions are pinned in `upstream-lock.json`; `source/` contains the modified GPL source. An upstream report describes a service startup failure on a 2020 M340i. Its cause remains unconfirmed without logs from that firmware.
 
 Reviewed components: native app/kit lifecycle, parked signal adapter, control socket model; Node daemon search, device sign-in, stream lookup, fetch UID, cache pruning, progressive audio and MediaPlayer methods; Python MP4/Annex-B conversion and range transfer; native NAL parser, index, frame pacing, VAAPI/MSDK surfaces, MGVF publication; service/check/build/release manifests. Cluster review includes C++ client/protocol, Waze decoder reuse, named map targets, frame atlas and non-contending ownership. Store review includes tool manifests, deploy artifact entry point, OAP packing and catalog schema. This is source-level review, not exhaustive firmware validation.
 

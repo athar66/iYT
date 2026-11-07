@@ -1,6 +1,6 @@
 # iYT native interface
 
-Audience: UK owner of a 2022 BMW 530 xDrive, using iDrive 7's rotary controller.
+Audience: BMW iDrive 7 users navigating with the rotary controller.
 Purpose: find content and control playback with stable native focus and minimal visual noise.
 
 The existing canvas, native HMI speller, bundled Ubuntu/Noto font atlases, 1600×520 layout and controller focus paths remain canonical. No browser framework or external fonts.

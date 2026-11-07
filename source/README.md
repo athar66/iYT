@@ -1,6 +1,6 @@
 # iYT source
 
-This is the iYT fork of RideTube, retaining GPL notices and attribution. See [project README](../README.md) and [build/publishing instructions](../docs/build.md).
+iYT application and playback-service source. See the [project README](../README.md), [build instructions](../docs/build.md) and [attribution](../licenses/NOTICE.md).
 
 The app is source/apps/iyt_app; its playback service is source/native/iyt-daemon. Native target binaries and the verified official extractor are committed under the service's prebuilt directory for MGU Store repo-tree installation. SDK-free packages are built without a local BMW SDK; the Store uses a stock donor on the head unit.
 

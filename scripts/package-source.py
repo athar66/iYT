@@ -24,11 +24,11 @@ for name in ['README.md', 'DESIGN.md', 'UX-CONTRACT.md', 'upstream-lock.json']:
 files.extend(p for p in (r/'reports').glob('*') if p.is_file() and 'issues' not in p.name)
 for name in ['LICENSE', 'PROTOCOL.md']:
     if (cr/name).exists(): files.append(cr/name)
-archive = out/'ridetube-enhanced-0.4.0-source.tar.gz'
+archive = out/'iyt-0.4.0-source.tar.gz'
 with archive.open('wb') as f, gzip.GzipFile(fileobj=f, mode='wb', filename='', mtime=0) as gz, tarfile.open(fileobj=gz, mode='w', format=tarfile.PAX_FORMAT) as tar:
     for p in sorted(set(files)):
         data = p.read_bytes()
-        info = tarfile.TarInfo('ridetube-enhanced/' + p.relative_to(r).as_posix())
+        info = tarfile.TarInfo('iyt/' + p.relative_to(r).as_posix())
         info.size = len(data)
         info.mode = 0o755 if p.suffix == '.sh' else 0o644
         info.uid = info.gid = info.mtime = 0

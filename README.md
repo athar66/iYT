@@ -1,30 +1,53 @@
 # iYT
 
-Native YouTube app for BMW MGU iDrive 7, derived from RideTube. Includes native audio, Intel hardware H.264 video, signed-in feeds, search, continue watching, quality controls and diagnostics.
+A native YouTube player for BMW iDrive 7.
 
-## Install from MGU Store
+iYT combines an iDrive interface with BMW's native audio playback and Intel hardware-accelerated H.264 video decoding.
 
-The repository is **private**, as requested. Give MGU Store GitHub access to athar66/iYT first (through its GitHub account connection with this repository allowed, or a suitably restricted token). Add **athar66/iYT** as a source, select **Releases**, then install **iYT**. The published `catalog` release lists **iYT** and **iYT playback service** with authenticated asset URLs. The Store installs declared dependencies first. The **main branch** is also supported through root `mgu-repo.json`.
+## Features
 
-The required Node22 runtime is published by **JustAnotherPU/mgu-apps**. Add that repository's Releases source if it is not already available. Standard Store sources supply mgu-deploy, mgu-python and mgu-render; mgu-inputgate comes from cauliflowermossgrape/idrive7-apps.
+- Search YouTube and browse signed-in feeds.
+- Continue watching and access subscriptions and Watch later.
+- Control playback, seek and select video quality using the iDrive controller.
+- View playback and service diagnostics.
+- Play audio through the vehicle's media system.
+- Show video on the main display while parked.
 
-**You do not need a BMW SDK on your PC.** The Store generates `oap-sdk` from a stock BMW app already on the head unit. No BMW SDK or firmware is included here.
+## Requirements
 
-## Included deployment files
+- BMW MGU head unit running iDrive 7 (ID7).
+- MGU Store and a working internet connection through `mgu-uplink`.
+- The standard Store sources and `cauliflowermossgrape/idrive7-apps`.
+- `JustAnotherPU/mgu-apps` as a Releases source for the Node.js 22 runtime.
 
-- Root `mgu-repo.json`: Store discovery and on-head-unit app build.
-- `source/apps/iyt_app`: native app, settings and icon.
-- `source/native/iyt-daemon`: service manifest and committed target binaries under prebuilt/.
-- `dist/release`: SDK-free app package, native service package, checksummed catalog and icon, ready for a GitHub release tagged `catalog`.
+Required service and runtime dependencies are declared in the package manifests and installed by the Store when available.
 
-App id `iyt_app`; service id `iyt-daemon`; separate data/cache/control/frame namespaces preserve original RideTube. Avoid simultaneous audio playback in both apps: BMW's generic media source is shared.
+## Installation
 
-## Verification and limits
+1. Open **MGU Store → Sources**.
+2. Add **athar66/iYT** and select **Releases**.
+3. Refresh the source, select **iYT**, then choose **Install**.
 
-Target decoder and lock wrapper built with GCC7.5/glibc2.27 in the exact pinned Ubuntu18 image userland. Loader/library ABI and all 18 media imports passed checks. The actual Store reader discovers both components, packages the service, and prepares the real SDK-free app using a synthetic donor in host tests. Native app frames and controller flows run against the upstream head-unit stub.
+For a private repository, grant the Store's GitHub connection access before adding the source. The **main** branch also supports installation from source.
 
-**Store-ready does not mean verified on your car.** No installation or vehicle test has been performed. Firmware-specific startup, audio clock, GPU behaviour and sustained playback still need validation. See [release validation](reports/release-validation.json), [test results](reports/checks.json) and [remaining work](docs/known-limitations.md).
+No separate BMW SDK download is required. The Store supplies `oap-sdk` from a stock BMW application already installed on the head unit.
 
-Real cluster video remains disabled; cluster modes are development/simulator-only. Vehicle-state input is optional in the simulator. Main-screen hardware playback retains parked-only behaviour.
+## Compatibility
 
-GPL-3.0-or-later, derived from JustAnotherPU/RideTube with original notices preserved. See [licences](licenses/NOTICE.md), source/LICENSE and source/THIRD_PARTY_LICENSES.
+iYT targets x86-64 MGU head units running ID7. Native binaries are checked against the target loader and library interfaces. Automated checks cover playback control, native UI flows, media handling and Store packaging.
+
+Real-vehicle installation and sustained playback have not yet been validated. Firmware compatibility may vary. Stop other media playback before starting iYT to avoid conflicts with BMW's shared generic media source.
+
+Instrument-cluster video is not enabled in the vehicle release. Cluster output is available only for development and simulation.
+
+## Development
+
+See [build instructions](docs/build.md), [compatibility](docs/compatibility.md), [known limitations](docs/known-limitations.md) and [test results](reports/RESULTS.md).
+
+## Uninstall
+
+Stop playback, sign out if needed, then remove **iYT** and **iYT playback service** through MGU Store. Keep shared dependencies that other applications use.
+
+## Licence
+
+GPL-3.0-or-later. See [LICENSE](source/LICENSE), [attribution and notices](licenses/NOTICE.md) and [third-party licences](source/THIRD_PARTY_LICENSES).

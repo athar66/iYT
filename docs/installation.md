@@ -1,6 +1,6 @@
 # MGU Store installation
 
-Keep the repository private. First give the Store's GitHub connection access to athar66/iYT. If using its GitHub App sign-in, allow the repository in that app's GitHub installation; alternatively use a repository-scoped token with the read access documented by MGU Store.
+For private repositories, give the Store's GitHub connection access to athar66/iYT. If using its GitHub App sign-in, allow the repository in that app's GitHub installation; alternatively use a repository-scoped token with the read access documented by MGU Store.
 
 Add athar66/iYT in Store → Sources, choose Releases, refresh, then select iYT → Install. The published catalog release contains the SDK-free app, native service, icon and checked artifact metadata. The Store supplies the SDK from its stock BMW donor. You do not download, extract or supply a BMW SDK yourself.
 
@@ -10,6 +10,6 @@ Both routes are published: Releases reads the catalog release; main reads mgu-re
 
 Names: iyt_app (app), iyt-daemon (service), /var/opt/iyt-daemon (data), /run/iyt-daemon/ctl.sock (control) and /dev/shm/mgu-video-iyt (video). The bundled iyt-lock enforces one daemon instance; it requires no firmware-provided flock command.
 
-Original RideTube is preserved. Stop its playback before using iYT because BMW exposes the same generic media audio source. Uninstall iYT and iYT playback service only through the Store. Shared dependencies stay if other apps need them.
+Stop other media applications before using iYT because BMW exposes a shared generic media audio source. Uninstall iYT and iYT playback service only through the Store. Shared dependencies stay if other apps need them.
 
-This release has host tests and target ABI validation, but no actual car installation result. Keep the car parked with stable power during the owner's eventual Store installation. Real cluster video is not enabled.
+This release has host tests and target ABI validation, but no real-vehicle installation result. Keep the car parked with stable power during installation. Real cluster video is not enabled.
