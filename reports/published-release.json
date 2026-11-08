@@ -1,4 +1,5 @@
 {
+  "repository": "athar66/iYT",
   "tag": "catalog",
   "assets": [
     {
@@ -32,9 +33,14 @@
       "url": "https://api.github.com/repos/athar66/iYT/releases/assets/724236193"
     },
     {
-      "name": "catalog.json",
+      "name": "catalog-archive-724265974.json",
       "size": 1633,
       "url": "https://api.github.com/repos/athar66/iYT/releases/assets/724265974"
+    },
+    {
+      "name": "catalog.json",
+      "size": 1669,
+      "url": "https://api.github.com/repos/athar66/iYT/releases/assets/724772671"
     },
     {
       "name": "iyt-daemon@0.4.0.tgz",
@@ -60,6 +66,11 @@
       "name": "iyt-daemon@0.5.1.tgz",
       "size": 4503496,
       "url": "https://api.github.com/repos/athar66/iYT/releases/assets/724110168"
+    },
+    {
+      "name": "iyt-daemon@0.5.2.tgz",
+      "size": 4503382,
+      "url": "https://api.github.com/repos/athar66/iYT/releases/assets/724772632"
     },
     {
       "name": "iyt_app.png",
@@ -92,14 +103,19 @@
       "url": "https://api.github.com/repos/athar66/iYT/releases/assets/724110122"
     },
     {
+      "name": "iyt_app@0.5.2.tgz",
+      "size": 1183142,
+      "url": "https://api.github.com/repos/athar66/iYT/releases/assets/724772588"
+    },
+    {
       "name": "mgu-store.json",
       "size": 213,
       "url": "https://api.github.com/repos/athar66/iYT/releases/assets/720860932"
     },
     {
       "name": "SHA256SUMS",
-      "size": 751,
-      "url": "https://api.github.com/repos/athar66/iYT/releases/assets/724266009"
+      "size": 922,
+      "url": "https://api.github.com/repos/athar66/iYT/releases/assets/724772720"
     },
     {
       "name": "SHA256SUMS-720860974",
@@ -130,10 +146,14 @@
       "name": "SHA256SUMS-724236236",
       "size": 922,
       "url": "https://api.github.com/repos/athar66/iYT/releases/assets/724236236"
+    },
+    {
+      "name": "SHA256SUMS-724266009",
+      "size": 751,
+      "url": "https://api.github.com/repos/athar66/iYT/releases/assets/724266009"
     }
   ],
-  "repository": "athar66/iYT",
-  "vehicleDeployed": false,
+  "private": false,
   "releaseUrl": "https://github.com/athar66/iYT/releases/tag/catalog",
-  "private": false
+  "vehicleDeployed": false
 }
