@@ -65,7 +65,11 @@ async function watch(iface, instance, handlers, log, opts) {
             }
         });
         await nativeTick(() => {
-            try { return p.subscribeToAvailability((a) => { res.available = !!a; if (a) setImmediate(fetchAll); }); } catch (e) { return null; /* older binding */ }
+            try { return p.subscribeToAvailability((a) => {
+                res.available = !!a;
+                if (opts && opts.onAvailability) opts.onAvailability(res.available);
+                if (a) setImmediate(fetchAll);
+            }); } catch (e) { return null; /* older binding */ }
         });
         for (const f of fields) {
             try {
@@ -74,7 +78,11 @@ async function watch(iface, instance, handlers, log, opts) {
                 if (log) log.warn('subscribe ' + iface + '.' + f + ': ' + e);
             }
         }
-        if (p.isAvailable && p.isAvailable()) { res.available = true; fetchAll(); }
+        if (p.isAvailable && p.isAvailable()) {
+            res.available = true;
+            if (opts && opts.onAvailability) opts.onAvailability(true);
+            fetchAll();
+        }
         if (opts && opts.pollMs) setInterval(() => { if (res.available) setImmediate(fetchAll); }, opts.pollMs);
     } catch (e) {
         res.error = String(e);

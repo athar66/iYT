@@ -38,7 +38,7 @@ iYT targets x86-64 MGU head units running ID7. Native binaries are checked again
 
 Real-vehicle installation and sustained playback have not yet been validated. Firmware compatibility may vary. Stop other media playback before starting iYT to avoid conflicts with BMW's shared generic media source.
 
-Instrument-cluster video is not enabled in the vehicle release. Cluster output is available only for development and simulation.
+Version 0.5.0 includes optional cluster video for hardware testing. Update both iYT and its playback service, ensure `cluster-render` 0.4.2 or newer is installed, then enable **Settings → Cluster map video (Park only)**. Video uses only the map area and requires fresh explicit Park and exactly zero speed. Missing, conflicting or stale readings stop the cluster output. See [hardware test instructions](docs/cluster-hardware-test.md).
 
 ## Development
 

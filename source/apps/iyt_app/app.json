@@ -1,13 +1,18 @@
 {
   "id": "iyt_app",
   "title": "iYT",
-  "description": "YouTube for BMW iDrive 7: search, signed-in shelves and native audio playback. Picture while parked; optional cluster simulator output.",
-  "version": "0.4.2",
+  "description": "YouTube for BMW iDrive 7 with native audio and optional Park-only video in the cluster map area.",
+  "version": "0.5.0",
   "license": "GPL-3.0-or-later",
   "vendor": "custom",
   "loggingId": "OARE",
   "iconGlyph": "iYT",
   "signals": {
+    "de.bmw.infrastructure.VehicleInformation": {
+      "_optional": "Cluster map video needs a fresh explicit Park signal",
+      "statusGearboxDrive": "rs",
+      "DataPowerTrain2": "rs"
+    },
     "de.bmw.infotainment.vehicle.Vehicle2": {
       "statusCarSpeed2": "rs"
     },
@@ -172,6 +177,12 @@
     }
   ],
   "settings": [
+    {
+      "key": "clusterVideo",
+      "label": "Cluster map video (Park only)",
+      "type": "bool",
+      "default": false
+    },
     {
       "key": "fill",
       "label": "Fill the screen (crops the video; off: black side bars)",

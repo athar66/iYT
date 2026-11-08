@@ -1,0 +1,11 @@
+{
+  "profile": "native-automotive",
+  "sourceRoots": ["source/apps/iyt_app"],
+  "locale": "en-GB",
+  "canonicalMap": "UX-CONTRACT.md",
+  "requiredCapabilities": ["Select/Listbox"],
+  "ownership": {"Select/Listbox": "native"},
+  "requiredCommands": ["unit"],
+  "commands": {"unit": "RTE_CHECK_SUITE=enhanced python3 scripts/run_checks.py"},
+  "evidence": {"failurePaths": "tests/cluster-vehicle.js"}
+}

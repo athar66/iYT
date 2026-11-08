@@ -12,4 +12,4 @@ Names: iyt_app (app), iyt-daemon (service), /var/opt/iyt-daemon (data), /run/iyt
 
 Stop other media applications before using iYT because BMW exposes a shared generic media audio source. Uninstall iYT and iYT playback service only through the Store. Shared dependencies stay if other apps need them.
 
-This release has host tests and target ABI validation, but no real-vehicle installation result. Keep the car parked with stable power during installation. Real cluster video is not enabled.
+This release has host tests and target ABI validation, but no real-vehicle installation result. Keep the car parked with stable power during installation. Version 0.5.0 includes optional guarded map-area video; see [hardware test instructions](cluster-hardware-test.md). Update both app and service and install cluster-render 0.4.2 or newer.

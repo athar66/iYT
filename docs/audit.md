@@ -21,6 +21,6 @@ Reviewed components: native app/kit lifecycle, parked signal adapter, control so
 | Native decoder pools, B-frames, A/V clock | Existing decoder/player tests | Already implemented upstream; kept. No hardware performance improvement claimed |
 | MGVF triple-slot publication | Existing release/acquire atomics | Kept; isolated fork pathname. No unverified change to renderer wire ABI |
 | map 0x100 assumption | current cluster protocol and backend | Client must use target `map`; id7 1088×480 capability checked. Numeric target not exposed as an app API |
-| Vehicle gear signal / layer restoration | no validated target-vehicle evidence | Real cluster disabled; optional vehicle input in simulator only |
+| Vehicle gear signal / layer restoration | no validated target-vehicle evidence | 0.5.0 explicit gear/speed guard and map-only route implemented; target firmware validation pending |
 
 Licences: RideTube GPL-3.0-or-later, kit MIT, upstream decoder attribution GPL; cluster client/protocol MPL-2.0; Store GPL-3.0; bundled fonts Ubuntu Font Licence / OFL; jpeg-js BSD-3-Clause; yt-dlp Unlicense; SponsorBlock data CC BY-NC-SA 4.0. Preserve upstream LICENSE and THIRD_PARTY_LICENSES. Source releases include modified GPL source and build scripts. Do not distribute BMW SDK files. Packaging tools and external toolchains retain their own notices.

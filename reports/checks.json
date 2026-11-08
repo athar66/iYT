@@ -57,55 +57,55 @@
     "suite": "enhanced",
     "test": "test_runtime",
     "code": 0,
-    "duration_s": 11.808
+    "duration_s": 11.671
   },
   {
     "suite": "enhanced",
     "test": "test_life",
     "code": 0,
-    "duration_s": 0.084
+    "duration_s": 0.065
   },
   {
     "suite": "enhanced",
     "test": "test_parked",
     "code": 0,
-    "duration_s": 0.079
+    "duration_s": 0.061
   },
   {
     "suite": "enhanced",
     "test": "test_qr",
     "code": 0,
-    "duration_s": 0.131
+    "duration_s": 0.112
   },
   {
     "suite": "enhanced",
     "test": "test_ridetube",
     "code": 0,
-    "duration_s": 22.963
+    "duration_s": 23.733
   },
   {
     "suite": "enhanced",
     "test": "daemon",
     "code": 0,
-    "duration_s": 28.243
+    "duration_s": 28.027
   },
   {
     "suite": "enhanced",
     "test": "thumbnails",
     "code": 0,
-    "duration_s": 1.095
+    "duration_s": 1.056
   },
   {
     "suite": "enhanced",
     "test": "media",
     "code": 0,
-    "duration_s": 9.862
+    "duration_s": 9.111
   },
   {
     "suite": "enhanced",
     "test": "native",
     "code": 0,
-    "duration_s": 1.732
+    "duration_s": 9.402
   },
   {
     "suite": "enhanced",
@@ -114,7 +114,22 @@
   },
   {
     "suite": "enhanced",
+    "test": "cluster-vehicle",
+    "code": 0
+  },
+  {
+    "suite": "enhanced",
+    "test": "cluster-control",
+    "code": 0
+  },
+  {
+    "suite": "enhanced",
     "test": "audio-handoff",
+    "code": 0
+  },
+  {
+    "suite": "enhanced",
+    "test": "error-domains",
     "code": 0
   },
   {

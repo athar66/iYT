@@ -1,3 +1,10 @@
 make: Entering directory '/iyt-build'
-make: Nothing to be done for 'target-in-docker'.
+mkdir -p build/target
+g++ -std=c++14 -O2 -g -Wall -Wextra -Werror -Isrc -Iabi/include -Isrc/cluster -Isrc/cluster/include -DRTE_CLUSTER_OUTPUT -DNDEBUG -DYTDEC_VERSION='"iYT-0.5.0"' -pthread \
+	-Wl,--dynamic-linker=/lib/ld-linux-x86-64.so.2 -o build/target/ytdec src/main.cpp src/decoder_msdk.cpp src/nal_reader.cpp src/player.cpp src/index.cpp src/mgvf.cpp src/cluster/client.cpp src/cluster/protocol.cpp build/target/stub/libmfxhw64.so build/target/stub/libva.so.1 build/target/stub/libva-drm.so.1
+python3 tools/abi.py check build/target/ytdec abi/libvsomeip3.so.3.symbols   # loader, glibc/libstdc++ limits
+build/target/ytdec: ok
+python3 tools/woc_abi.py check-imports build/target/ytdec --prefix MFX va -- \
+	abi/libmfx.symbols abi/libva.symbols abi/libva-drm.symbols
+OK    build/target/ytdec: 18 checked imports, all exported by the unit's libraries
 make: Leaving directory '/iyt-build'

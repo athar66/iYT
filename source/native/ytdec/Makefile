@@ -19,12 +19,12 @@ DOCKER_IMAGE = docker image inspect $(IMAGE) >/dev/null 2>&1 || \
 VERSION := $(shell git describe --always --dirty 2>/dev/null || echo dev)
 
 CXXFLAGS = -std=c++14 -O2 -g -Wall -Wextra -Werror
-CPPFLAGS = -Isrc -Iabi/include
+CPPFLAGS = -Isrc -Iabi/include -Isrc/cluster -Isrc/cluster/include -DRTE_CLUSTER_OUTPUT
 T = $(BUILD)/target
 
 HOST_SRC = src/player.cpp src/index.cpp src/mgvf.cpp
-SRC = src/main.cpp src/decoder_msdk.cpp src/nal_reader.cpp $(HOST_SRC)
-HDR = $(wildcard src/*.h)
+SRC = src/main.cpp src/decoder_msdk.cpp src/nal_reader.cpp $(HOST_SRC) src/cluster/client.cpp src/cluster/protocol.cpp
+HDR = $(wildcard src/*.h src/cluster/*.h src/cluster/include/cluster_render/*.h)
 
 .PHONY: all test target target-in-docker clean
 all: test

@@ -754,6 +754,8 @@ function Daemon(o) {
     this.child = null;
     this.deaths = 0;
     this.videoOn = true;
+    this.displayMode = 'main';
+    this.clusterState = null;
     this.paused = false;
     this.elapsed = 0;
     this.total = 0;
@@ -1057,7 +1059,8 @@ Daemon.prototype.onLine = function (line) {
     case 'prefetch': return this.prefetch(m.id);
     case 'positions': return this.sendPositions();
     case 'diagnostics': return this.emit(diagnostics.report(this));
-    case 'display_mode': return this.emit({ev: 'error', code: 'E_CLUSTER_UNVALIDATED', msg: 'Only iDrive Screen Only is enabled on hardware; cluster modes require simulator build'});
+    case 'display_mode': return this.setDisplayMode(m.mode);
+    case 'cluster_vehicle': return this.updateClusterVehicle(m);
     case 'status': this.sendState(); if (this.total) this.emit({ ev: 'time', elapsed: this.elapsed, total: this.total }); return undefined;
     case 'search': return this.search(m.q);
     case 'thumb': return this.thumb(m.id);
@@ -1563,6 +1566,22 @@ Daemon.prototype.onPlaybackError = function (v) {
 };
 
 // ---- ytdec
+Daemon.prototype.setDisplayMode = function (mode) {
+    if (mode !== 'main' && mode !== 'dual') return this.emit({ev: 'error', code: 'E_DISPLAY_MODE', msg: 'Choose iDrive only or iDrive and cluster map'});
+    this.displayMode = mode;
+    this.toYtdec('output ' + mode);
+    if (mode === 'main') this.toYtdec('vehicle lost');
+};
+Daemon.prototype.updateClusterVehicle = function (m) {
+    const ttl = Math.floor(Math.min(750, m.expiresAt - Date.now()));
+    if (m.park !== true || m.speed !== 0 || !Number.isFinite(m.expiresAt) || ttl <= 0 || m.expiresAt - Date.now() > 2000) {
+        this.toYtdec('vehicle lost');
+        return;
+    }
+    const tick = process.hrtime();
+    const deadline = Math.floor(tick[0] * 1000 + tick[1] / 1000000) + ttl;
+    this.toYtdec('vehicle 1 0 ' + deadline);
+};
 Daemon.prototype.spawnYtdec = function (seekMs) {
     const c = this.cur;
     const args = ['--dir', c.dir, '--rect', c.rect];
@@ -1575,6 +1594,9 @@ Daemon.prototype.spawnYtdec = function (seekMs) {
         return this.ytdecDied(null, 'spawn: ' + e.message);
     }
     this.child = child;
+    this.clusterState = null;
+    this.toYtdec('vehicle lost');
+    this.toYtdec('output ' + this.displayMode);
     this.lastProgress = Date.now();
     this.lastDecoded = -1;
     this.eof = false;
@@ -1595,6 +1617,11 @@ Daemon.prototype.onYtdecLine = function (child, l) {
     if (child !== this.child) return;
     let m;
     try { m = JSON.parse(l); } catch (e) { return; }
+    if (m.ev === 'cluster') {
+        this.clusterState = {allowed: m.allowed === true, shown: m.shown === true, connected: m.connected === true,
+            status: typeof m.status === 'string' ? m.status.slice(0, 240) : 'unknown', receivedAt: Date.now()};
+        return;
+    }
     if (m.ev === 'stats') {
         this.decoderStats = Object.assign({receivedAt: Date.now()}, m);
         if (typeof m.decoded === 'number' && m.decoded !== this.lastDecoded) {

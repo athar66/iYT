@@ -5,8 +5,13 @@
 #include <iostream>
 int main() {
     rte::Safety real;
-    real.update({true, 0, 100});
     assert(!real.allowed(100));
+    real.update({true, 0, 100});
+    assert(real.allowed(100));
+    assert(!real.allowed(850));
+    real.update({true, 0, 100, 5}); assert(!real.allowed(105));
+    real.update({true, 0, 100, 751}); assert(!real.allowed(100));
+    real.lost(); assert(!real.allowed(100));
     rte::Safety sim(true);
     assert(sim.allowed(100)); // optional provider in development
     sim.update({true, 0, 100}); assert(sim.allowed(100));
@@ -43,5 +48,5 @@ int main() {
     try { rte::ClusterAdapter adapter(cr::kDefaultSocket, true); }
     catch (const std::invalid_argument &) { rejected = true; }
     assert(rejected);
-    std::cout << "router: modes, fps, atlas, optional state, fail-closed hardware passed\n";
+    std::cout << "router: modes, fps, atlas, optional simulator state, gated hardware passed\n";
 }
