@@ -3,6 +3,6 @@
 {"ev": "format", "kind": "audio", "format": {"protocol": "http"}}
 ....
 ----------------------------------------------------------------------
-Ran 14 tests in 9.608s
+Ran 14 tests in 8.979s
 
 OK (skipped=1)

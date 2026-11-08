@@ -35,3 +35,9 @@ Completed audio is handed to BMW MediaPlayer through a dedicated audio-only path
 Platform-runtime playback/account/thumbnail checks and the enhanced suites pass. Audio/container synthetic media tests pass; full online media-download and actual vehicle playback validation remain outstanding. Diagnostics now separate BMW audio/media rejection from native decoder errors and display selected format metadata without signed URLs.
 
 H.264 hardware decoding is unchanged; no software multi-format decoder has been introduced. Refresh Diagnostics after a failure to identify whether the remaining issue is audio access/parsing or native video decoding.
+
+## Installation compatibility candidate 0.5.2
+
+The reported failure occurs at GenerateSomeipInterface. The candidate removes unverified read/getter access from the two new gear fields, matching the notification-only declaration in the gear-cluster reference. The actual generated package preserves every working 0.4.2 proxy permission and offered service; only notification-only gear and controller subscriptions are added. A real Store linker test also removes the optional interfaces when the simulated firmware lacks them.
+
+All 22 enhanced host check groups, package/donor checks, target ABI validation and the static interface audit pass. BMW's actual interface generator and app manager have not run in these checks. Vehicle installation must confirm the hypothesis. The published stable catalog and main branch remain at 0.4.2; this source candidate is isolated on codex/install-compatibility. Search, Settings, Exit, controller fallback and guarded map output from the later work are retained.

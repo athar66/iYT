@@ -1,5 +1,7 @@
 # iYT
 
+This branch contains the **0.5.2 installation compatibility candidate**. The stable Store release remains **0.4.2**. See [candidate test instructions](docs/install-compatibility.md).
+
 A native YouTube player for BMW iDrive 7.
 
 iYT combines an iDrive interface with BMW's native audio playback and Intel hardware-accelerated H.264 video decoding.
@@ -10,6 +12,7 @@ iYT combines an iDrive interface with BMW's native audio playback and Intel hard
 - Continue watching and access subscriptions and Watch later.
 - Control playback, seek and select video quality using the iDrive controller.
 - View playback and service diagnostics.
+- Open Search, Settings and Exit from dedicated buttons. Leaving the app stops playback.
 - Play audio through the vehicle's media system.
 - Show video on the main display while parked.
 
@@ -38,7 +41,7 @@ iYT targets x86-64 MGU head units running ID7. Native binaries are checked again
 
 Real-vehicle installation and sustained playback have not yet been validated. Firmware compatibility may vary. Stop other media playback before starting iYT to avoid conflicts with BMW's shared generic media source.
 
-Instrument-cluster video is not enabled in the vehicle release. Cluster output is available only for development and simulation.
+Version 0.5.0 includes optional cluster video for hardware testing. Update both iYT and its playback service, ensure `cluster-render` 0.4.2 or newer is installed, then enable **Settings → Cluster map video (Park only)**. Video uses only the map area and requires fresh explicit Park and exactly zero speed. Missing, conflicting or stale readings stop the cluster output. See [hardware test instructions](docs/cluster-hardware-test.md).
 
 ## Development
 

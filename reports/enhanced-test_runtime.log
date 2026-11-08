@@ -1,4 +1,4 @@
-  a static page at 60 fps for 2.5 s: 4 FRAMEs, longest gap 1007 ms
+  a static page at 60 fps for 2.5 s: 4 FRAMEs, longest gap 1006 ms
   a static sheet for 1.5 s: 2 FRAMEs
 ok    unchanged frames: not sent again, but one a second (the renderer hides an app quiet for 3 s)
 ok    a sheet's press, back and touch target that throw: logged, the app runs on

@@ -1,0 +1,10 @@
+'use strict';
+const assert = require('assert');
+const fs = require('fs');
+const spec = JSON.parse(fs.readFileSync(require('path').join(__dirname, '../source/apps/iyt_app/app.json')));
+const gear = spec.signals['de.bmw.infrastructure.VehicleInformation'];
+assert.strictEqual(gear.statusGearboxDrive, 's');
+assert.strictEqual(gear.DataPowerTrain2, 's');
+assert.strictEqual(spec.signals['de.bmw.infotainment.controlelements.FrontCCU'].statusRotaryEncoderState, 's');
+assert.strictEqual(spec.signals['de.bmw.infotainment.vehicle.Vehicle2'].statusCarSpeed2, 'rs');
+console.log('installation permission policy: new gear/controller fields request notifications only; existing speed read access retained');

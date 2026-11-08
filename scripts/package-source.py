@@ -24,7 +24,7 @@ for name in ['README.md', 'DESIGN.md', 'UX-CONTRACT.md', 'upstream-lock.json']:
 files.extend(p for p in (r/'reports').glob('*') if p.is_file() and 'issues' not in p.name)
 for name in ['LICENSE', 'PROTOCOL.md']:
     if (cr/name).exists(): files.append(cr/name)
-archive = out/'iyt-0.4.2-source.tar.gz'
+archive = out/'iyt-0.5.2-source.tar.gz'
 with archive.open('wb') as f, gzip.GzipFile(fileobj=f, mode='wb', filename='', mtime=0) as gz, tarfile.open(fileobj=gz, mode='w', format=tarfile.PAX_FORMAT) as tar:
     for p in sorted(set(files)):
         data = p.read_bytes()

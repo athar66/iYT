@@ -1,0 +1,11 @@
+{
+  "candidate": "0.5.2",
+  "baseline": "user-confirmed working 0.4.2 package",
+  "existingProxyPermissionsUnchanged": true,
+  "offeredServicesUnchanged": true,
+  "newFieldsNotificationOnly": true,
+  "reportedFailureStage": "GenerateSomeipInterface",
+  "bmwAppManagerExecuted": false,
+  "vehicleInstallValidated": false,
+  "stableCatalogChanged": false
+}

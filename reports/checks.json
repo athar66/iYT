@@ -57,55 +57,55 @@
     "suite": "enhanced",
     "test": "test_runtime",
     "code": 0,
-    "duration_s": 11.808
+    "duration_s": 11.687
   },
   {
     "suite": "enhanced",
     "test": "test_life",
     "code": 0,
-    "duration_s": 0.084
+    "duration_s": 0.064
   },
   {
     "suite": "enhanced",
     "test": "test_parked",
     "code": 0,
-    "duration_s": 0.079
+    "duration_s": 0.059
   },
   {
     "suite": "enhanced",
     "test": "test_qr",
     "code": 0,
-    "duration_s": 0.131
+    "duration_s": 0.113
   },
   {
     "suite": "enhanced",
     "test": "test_ridetube",
     "code": 0,
-    "duration_s": 22.963
+    "duration_s": 24.358
   },
   {
     "suite": "enhanced",
     "test": "daemon",
     "code": 0,
-    "duration_s": 28.243
+    "duration_s": 28.04
   },
   {
     "suite": "enhanced",
     "test": "thumbnails",
     "code": 0,
-    "duration_s": 1.095
+    "duration_s": 1.122
   },
   {
     "suite": "enhanced",
     "test": "media",
     "code": 0,
-    "duration_s": 9.862
+    "duration_s": 9.206
   },
   {
     "suite": "enhanced",
     "test": "native",
     "code": 0,
-    "duration_s": 1.732
+    "duration_s": 8.478
   },
   {
     "suite": "enhanced",
@@ -114,7 +114,42 @@
   },
   {
     "suite": "enhanced",
+    "test": "install-permissions",
+    "code": 0
+  },
+  {
+    "suite": "enhanced",
+    "test": "cluster-vehicle",
+    "code": 0
+  },
+  {
+    "suite": "enhanced",
+    "test": "cluster-control",
+    "code": 0
+  },
+  {
+    "suite": "enhanced",
+    "test": "controller-input",
+    "code": 0
+  },
+  {
+    "suite": "enhanced",
+    "test": "speller",
+    "code": 0
+  },
+  {
+    "suite": "enhanced",
+    "test": "touch-layout",
+    "code": 0
+  },
+  {
+    "suite": "enhanced",
     "test": "audio-handoff",
+    "code": 0
+  },
+  {
+    "suite": "enhanced",
+    "test": "error-domains",
     "code": 0
   },
   {

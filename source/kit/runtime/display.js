@@ -42,6 +42,7 @@ const { Canvas } = require('./canvas');
 const { RenderClient } = require('./renderd');
 const G = require('./gauges');
 const { drawCredit } = require('./credits');
+const ControllerInput = require('./controller-input');
 
 // FrontCCU deflection: short / long push per direction (DREHGEBER enums as numbers)
 const TILT = { 1: 'N', 2: 'N', 4: 'E', 5: 'E', 7: 'S', 8: 'S', 10: 'W', 11: 'W' };
@@ -96,6 +97,10 @@ class Display {
         this.frames = 0; this.jsMs = 0; this.statT = Date.now();
         this.sheet = null;                           // sheet.js page drawn over the app's (openSheet)
         this.ccuLast = null;                         // last controller state (knob counter, press, push)
+        this.lastRendererCcuAt = 0;
+        this.lastInputSignature = null;
+        this.inputSource = 'no events received';
+        this.suspensions = new Set();
         this.ownHidden = new Set();                  // more bar buttons left out where the kit runs the screen (hideButton)
         G.onConfirm(() => { this.lastWords = null; this.tickHandlers.forEach((fn) => fn()); });   // a reset asks / runs out
         const canvasScreens = (spec.screens || []).filter((s) => s.kind === 'canvas');
@@ -185,7 +190,11 @@ class Display {
                 this._lost();                       // (shows the HMI's bar again)
             }, 1500);
         });
-        gpu.on('ccu', (v) => { if (this.gpu !== gpu) return; if (this.onCcu && !this.own()) this.onCcu(v); else this._ccu(v); });
+        gpu.on('ccu', (v) => {
+            if (this.gpu !== gpu) return;
+            this.lastRendererCcuAt = Date.now();
+            if (this.onCcu && !this.own()) this.onCcu(v); else this.controllerInput(v, 'renderer');
+        });
         gpu.on('touch', (phase, x, y) => { if (this.gpu === gpu) this._touch(phase, x, y); });
         // the HMI was touched outside the tabs: shown again unless that left the screen
         gpu.on('closed', () => setTimeout(() => { if (this.gpu === gpu) this._syncVisible(); }, 700));
@@ -203,7 +212,7 @@ class Display {
     _grab() {
         if (!this.gpu) return;
         const gate = !this.gpu.native || !this.gpu.info || this.gpu.info.controller;
-        this.gpu.grab(this.grabbing || (this.own() && gate && !process.env.MGU_NO_GRAB));
+        this.gpu.grab(this._shown() && (this.grabbing || (this.own() && gate && !process.env.MGU_NO_GRAB)));
     }
 
     /** The kit runs the screen: mgu-render/1 with touch, full-screen layout. */
@@ -311,7 +320,24 @@ class Display {
         c.emit('action', {});
     }
 
-    /** The controller (held by the kit): knob, press and push, from the renderer. */
+    controllerInput(v, source) {
+        if (!this.own() || !this.active()) return;
+        const input = ControllerInput.decode(v);
+        if (!input) return;
+        const signature = [input.frontRotaryEncoderOperation, input.frontRotaryEncoderPushButton, input.frontRotaryEncoderDeflection].join(':');
+        if (signature === this.lastInputSignature) return;
+        this.lastInputSignature = signature;
+        this.inputSource = source;
+        this._ccu(input);
+    }
+    controllerFallback(v) {
+        const input = ControllerInput.decode(v);
+        if (!input || !this.own() || !this.active()) return;
+        setTimeout(() => {
+            if (Date.now() - this.lastRendererCcuAt >= 250) this.controllerInput(input, 'BMW signal');
+        }, 40);
+    }
+    /** The controller (held by the kit): knob, press and push. */
     _ccu(v) {
         const k = Number(v.frontRotaryEncoderOperation), pb = Number(v.frontRotaryEncoderPushButton), df = Number(v.frontRotaryEncoderDeflection);
         const L = this.ccuLast;
@@ -435,7 +461,8 @@ class Display {
             const bar = sy >= pl.h - this.barH() ? this.buttons().find((b) => sx >= b.x - this.barOff - pl.x && sx < b.x - this.barOff - pl.x + b.w) : null;
             // the header's tabs (Settings among them) work over a sheet too
             const tab = !bar && (this.tabs || []).find(inside);
-            const tgt = !bar && !tab && !this.sheet ? (this.pageTargets || []).find(inside) : null;
+            const tgt = !bar && !tab && !this.sheet ? (this.pageTargets || []).reduce((best, q) =>
+                inside(q) && (!best || (q.priority || 0) > (best.priority || 0)) ? q : best, null) : null;
             const key = bar ? 'bar:' + bar.id : tab ? 'tab:' + tab.i : tgt ? 'tgt:' + tgt.key : this.sheet ? 'sheet:' + (this.sheetTargets || []).findIndex(inside) : null;
             if (phase === 3 && this.dragging && !this.sheet) { this.dragging = false; this.ownDown = null; return; }
             if (phase === 3 && !this.dragging && key && key === this.ownDown && (tab || tgt)) {
@@ -615,14 +642,19 @@ class Display {
     }
 
     /** the screen is up and not covered by an HMI popup */
+    suspend(name, on) {
+        if (on) this.suspensions.add(name); else this.suspensions.delete(name);
+        this._syncVisible();
+    }
     _shown() {
         // the HMI's settings screen over ours (no drawn settings: another renderer, software): it shows, not our picture
-        return this.ui.isVisible(this.screen.name) && !this.ui.isVisible('SETTINGS') && (!this.ui.hasFocus || this.ui.hasFocus(this.screen.name));
+        return !this.suspensions.size && this.ui.isVisible(this.screen.name) && !this.ui.isVisible('SETTINGS') && (!this.ui.hasFocus || this.ui.hasFocus(this.screen.name));
     }
 
     _syncVisible() {
         if (!this.gpu) return;
         const on = this._shown();
+        this._grab();
         if (!on && this.showTimer) { clearTimeout(this.showTimer); this.showTimer = null; }
         if (on && !this.gpu.visible) {
             // the HMI zooms / slides its page in when the screen opens: the picture shows once the page

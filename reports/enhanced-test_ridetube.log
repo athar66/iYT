@@ -33,6 +33,7 @@ ok   legacy motion override is ignored; moving picture remains disabled
 text BTN_PLAY "Play"
 text BTN_PLAY "Pause"
 ok   podcast mode while driving: no picture, big controls, knob seek, Try again
+ok   native cluster setting: fresh Park enables dual; Neutral and setting off revoke output
 text BTN_LIST "Now playing"
 text BTN_LIST "Results"
 text BTN_LIST "Now playing"
@@ -62,5 +63,17 @@ text BTN_LIST "Results"
 text BTN_PLAY "Pause"
 text BTN_PLAY "Play"
 ok   autoplay: the next video in the row, 5 s after the end
+text BTN_S1 "test query"
+text BTN_S2 "News"
+text BTN_S3 "Music"
+text BTN_S4 "Cars"
+text BTN_S5 "Podcasts"
+text BTN_S6 "Comedy"
+text BTN_LIST "Now playing"
+open VIEW
+text BTN_LIST "Player"
+text BTN_ACCOUNT "Sign in"
+open VIEW
+ok   Search yields overlay/controller, ignores duplicate opens and sends query; closing app disconnects playback
 ok   channel search: a letter = the names starting with it, a word = the names (or handles) holding it
 ok   extras: Continue watching, positions, chapters, the skipped toast

@@ -1,13 +1,22 @@
 {
   "id": "iyt_app",
   "title": "iYT",
-  "description": "YouTube for BMW iDrive 7: search, signed-in shelves and native audio playback. Picture while parked; optional cluster simulator output.",
-  "version": "0.4.2",
+  "description": "YouTube for BMW iDrive 7 with native audio and optional Park-only video in the cluster map area.",
+  "version": "0.5.2",
   "license": "GPL-3.0-or-later",
   "vendor": "custom",
   "loggingId": "OARE",
   "iconGlyph": "iYT",
   "signals": {
+    "de.bmw.infotainment.controlelements.FrontCCU": {
+      "_optional": "Direct controller input fallback",
+      "statusRotaryEncoderState": "s"
+    },
+    "de.bmw.infrastructure.VehicleInformation": {
+      "_optional": "Cluster map video needs a fresh explicit Park signal",
+      "statusGearboxDrive": "s",
+      "DataPowerTrain2": "s"
+    },
     "de.bmw.infotainment.vehicle.Vehicle2": {
       "statusCarSpeed2": "rs"
     },
@@ -42,15 +51,28 @@
         [
           "BTN_FIND",
           "Search"
+        ],
+        [
+          "BTN_SETTINGS",
+          "Settings"
+        ],
+        [
+          "BTN_EXIT",
+          "Exit"
+        ],
+        [
+          "BTN_MENU",
+          "Menu"
         ]
       ]
     },
     {
       "name": "MAIN",
       "kind": "menu",
-      "title": "iYT search",
-      "settings": true,
+      "title": "iYT menu",
       "items": [
+        ["button", "BTN_MENU_SETTINGS", "Settings"],
+        ["button", "BTN_MENU_EXIT", "Exit iYT"],
         [
           "button",
           "BTN_SEARCH",
@@ -172,6 +194,12 @@
     }
   ],
   "settings": [
+    {
+      "key": "clusterVideo",
+      "label": "Cluster map video (Park only)",
+      "type": "bool",
+      "default": false
+    },
     {
       "key": "fill",
       "label": "Fill the screen (crops the video; off: black side bars)",
