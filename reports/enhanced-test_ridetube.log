@@ -33,7 +33,6 @@ ok   legacy motion override is ignored; moving picture remains disabled
 text BTN_PLAY "Play"
 text BTN_PLAY "Pause"
 ok   podcast mode while driving: no picture, big controls, knob seek, Try again
-ok   native cluster setting: fresh Park enables dual; Neutral and setting off revoke output
 text BTN_LIST "Now playing"
 text BTN_LIST "Results"
 text BTN_LIST "Now playing"

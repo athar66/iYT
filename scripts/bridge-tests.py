@@ -13,8 +13,8 @@ checks=[('network-contract',r/'tests/network-regression.js'),
 results=[]
 for name,test in checks:
     p=subprocess.run([str(node),'--max-http-header-size=65536',str(test)],env=env,text=True,capture_output=True,timeout=120)
-    (r/'reports'/f'0.5.0-{name}.log').write_text(p.stdout+p.stderr)
+    (r/'reports'/f'0.4.2-{name}.log').write_text(p.stdout+p.stderr)
     results.append({'test':name,'runtime':'Node8.16.2 platform compatibility','code':p.returncode})
     print(name+': '+str(p.returncode),flush=True)
-(r/'reports/0.5.0-bridge-checks.json').write_text(json.dumps(results,indent=2)+'\n')
+(r/'reports/0.4.2-bridge-checks.json').write_text(json.dumps(results,indent=2)+'\n')
 raise SystemExit(any(c['code'] for c in results))

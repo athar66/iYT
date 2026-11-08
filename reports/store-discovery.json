@@ -4,11 +4,11 @@
     {
       "id": "iyt_app",
       "title": "iYT",
-      "version": "0.5.0",
+      "version": "0.4.2",
       "requires": {
         "mgu-python": "1.0.2",
         "mgu-deploy": "0.3.2",
-        "iyt-daemon": "0.5.0",
+        "iyt-daemon": "0.4.2",
         "mgu-render": "0.6.11",
         "mgu-inputgate": "1.0.0"
       }
@@ -16,9 +16,8 @@
     {
       "id": "iyt-daemon",
       "title": "iYT playback service",
-      "version": "0.5.0",
+      "version": "0.4.2",
       "requires": {
-        "cluster-render": "0.4.2",
         "mgu-deploy": "0.7.0",
         "mgu-python": "1.0.2",
         "mgu-render": "0.6.11"
@@ -26,6 +25,6 @@
     }
   ],
   "skipped": [],
-  "toolBytes": 4503504,
+  "toolBytes": 3861241,
   "result": "passed"
 }

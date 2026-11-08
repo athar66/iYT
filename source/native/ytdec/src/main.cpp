@@ -16,7 +16,7 @@
 #include "decoder_msdk.h"
 #include "mgvf.h"
 #include "player.h"
-#if defined(RTE_CLUSTER_OUTPUT) || defined(RTE_CLUSTER_SIMULATOR)
+#ifdef RTE_CLUSTER_SIMULATOR
 #include "cluster_adapter.h"
 #endif
 
@@ -160,7 +160,7 @@ int run(int argc, char **argv)
     std::string dir, logpath;
     unsigned w = 1280, h = 720;
     bool fill = false;
-#if defined(RTE_CLUSTER_OUTPUT) || defined(RTE_CLUSTER_SIMULATOR)
+#ifdef RTE_CLUSTER_SIMULATOR
     std::string simulator_socket;
 #endif
     for (int i = 1; i < argc; i++) {
@@ -172,12 +172,8 @@ int run(int argc, char **argv)
                 return fail("--rect wants WxH", 2);
         } else if (a == "--fill")
             fill = true;
-#if defined(RTE_CLUSTER_OUTPUT) || defined(RTE_CLUSTER_SIMULATOR)
-        else if (a == "--cluster-simulator-socket" && i + 1 < argc
-#ifndef RTE_CLUSTER_SIMULATOR
-                 && false
-#endif
-        )
+#ifdef RTE_CLUSTER_SIMULATOR
+        else if (a == "--cluster-simulator-socket" && i + 1 < argc)
             simulator_socket = argv[++i];
 #endif
         else if (a == "--log" && i + 1 < argc)
@@ -207,20 +203,11 @@ int run(int argc, char **argv)
         return fail("decoder: " + err, 1);
 
     ytdec::Player player(dir, &dec, &out, emit, log_line, cpu_pct);
-#if defined(RTE_CLUSTER_OUTPUT) || defined(RTE_CLUSTER_SIMULATOR)
-    #ifdef RTE_CLUSTER_SIMULATOR
-    const bool simulator = true;
-#else
-    const bool simulator = false;
-#endif
-    rte::Safety safety(simulator);
+#ifdef RTE_CLUSTER_SIMULATOR
+    rte::Safety safety(true);
     rte::Router router;
     std::unique_ptr<rte::ClusterAdapter> cluster;
-    if (!simulator) cluster.reset(new rte::ClusterAdapter(cr::kDefaultSocket, false));
-    else if (!simulator_socket.empty()) cluster.reset(new rte::ClusterAdapter(simulator_socket, true));
-    bool video_enabled = true;
-    std::string last_cluster_status;
-    int64_t last_cluster_report = -1000;
+    if (!simulator_socket.empty()) cluster.reset(new rte::ClusterAdapter(simulator_socket, true));
     router.main = [&](const uint8_t *p, size_t n, int64_t) {
         memcpy(out.begin(), p, n); out.commit();
     };
@@ -235,24 +222,10 @@ int run(int argc, char **argv)
     fcntl(0, F_SETFL, fcntl(0, F_GETFL) | O_NONBLOCK);
     std::string inbuf;
     for (;;) {
-#if defined(RTE_CLUSTER_OUTPUT) || defined(RTE_CLUSTER_SIMULATOR)
-        if (cluster) {
-            cluster->poll(mono_ms(), video_enabled && router.mode != rte::Mode::Main && safety.allowed(mono_ms()));
-            const std::string status = !video_enabled || router.mode == rte::Mode::Main ? "off" :
-                !safety.allowed(mono_ms()) ? "waiting for fresh Park and zero speed" : cluster->status;
-            if (status != last_cluster_status || mono_ms() - last_cluster_report >= 1000) {
-                last_cluster_status = status;
-                last_cluster_report = mono_ms();
-                log_line("cluster map: " + status);
-                emit(std::string("{\"ev\":\"cluster\",\"allowed\":") +
-                    (safety.allowed(mono_ms()) ? "true" : "false") +
-                    ",\"connected\":" + (cluster->ready() ? "true" : "false") +
-                    ",\"status\":" + cr::json_quote(status) +
-                    ",\"shown\":" + (cluster->shown() ? "true" : "false") + "}");
-            }
-        }
+#ifdef RTE_CLUSTER_SIMULATOR
+        if (cluster) cluster->poll(mono_ms(), router.mode != rte::Mode::Main && safety.allowed(mono_ms()));
 #endif
-        const int wait = std::min(100, player.step(mono_ms()));
+        const int wait = player.step(mono_ms());
         struct pollfd p = {0, POLLIN, 0};
         if (poll(&p, 1, wait) < 0 && errno != EINTR)
             return fail(std::string("poll: ") + strerror(errno), 1);
@@ -274,25 +247,18 @@ int run(int argc, char **argv)
             inbuf.erase(0, nl + 1);
             if (!line.empty() && line.back() == '\r')
                 line.pop_back();
-#if defined(RTE_CLUSTER_OUTPUT) || defined(RTE_CLUSTER_SIMULATOR)
+#ifdef RTE_CLUSTER_SIMULATOR
             if (line == "output main" || line == "output cluster" || line == "output dual") {
                 router.mode = line == "output main" ? rte::Mode::Main : line == "output cluster" ? rte::Mode::Cluster : rte::Mode::Dual;
                 if (cluster && router.mode == rte::Mode::Main) cluster->release();
                 continue;
             }
             if (line == "vehicle lost") { safety.lost(); if (cluster) cluster->release(); continue; }
-            int park; long long deadline; double speed;
-            char extra;
-            if (sscanf(line.c_str(), "vehicle %d %lf %lld %c", &park, &speed, &deadline, &extra) == 3 && (park == 0 || park == 1)) {
-                const int64_t now = mono_ms();
-                const int64_t ttl = deadline >= now && deadline - now <= 750 ? deadline - now : 0;
-                safety.update({park == 1, speed, now, ttl});
+            int park; double speed;
+            if (sscanf(line.c_str(), "vehicle %d %lf", &park, &speed) == 2) {
+                safety.update({park == 1, speed, mono_ms()});
                 if (cluster && !safety.allowed(mono_ms())) cluster->release();
                 continue;
-            }
-            if (line == "video 0" || line == "video 1") {
-                video_enabled = line == "video 1";
-                if (!video_enabled && cluster) cluster->release();
             }
 #endif
             quit = !player.command(line, mono_ms());
@@ -304,9 +270,6 @@ int run(int argc, char **argv)
         if (inbuf.size() > 65536)
             inbuf.clear();   /* no newline in 64 KiB: not ours */
     }
-#if defined(RTE_CLUSTER_OUTPUT) || defined(RTE_CLUSTER_SIMULATOR)
-    if (cluster) cluster->release();
-#endif
     out.close();
     dec.d.shutdown();
     return 0;

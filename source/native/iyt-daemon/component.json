@@ -1,12 +1,11 @@
 {
   "id": "iyt-daemon",
   "kind": "tool",
-  "version": "0.5.0",
+  "version": "0.4.2",
   "license": "GPL-3.0-or-later",
   "title": "iYT playback service",
   "description": "Native playback service with BMW platform audio bridge, hardware H.264 decoding and bundled on-demand QuickJS extraction.",
   "requires": {
-    "cluster-render": "0.4.2",
     "mgu-deploy": "0.7.0",
     "mgu-python": "1.0.2",
     "mgu-render": "0.6.11"
@@ -18,11 +17,6 @@
     "ID7"
   ],
   "files": [
-    {
-      "path": "cluster-render-MPL-2.0.txt",
-      "from": "cluster-render-MPL-2.0.txt",
-      "mode": "0644"
-    },
     {
       "path": "ytd.js",
       "from": "ytd.js",

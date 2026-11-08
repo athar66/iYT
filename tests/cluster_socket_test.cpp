@@ -18,7 +18,6 @@ int main() {
     assert(bind(server, (sockaddr *)&address, sizeof address) == 0);
     assert(listen(server, 1) == 0);
     rte::ClusterAdapter adapter(path, true);
-    rte::Safety vehicle;
     int peer = -1;
     std::string input;
     bool layer = false, frame = false, dropped = false;
@@ -27,7 +26,7 @@ int main() {
         assert(send(peer, msg.data(), msg.size(), MSG_NOSIGNAL) == (ssize_t)msg.size());
     };
     auto pump = [&](int64_t now, bool permitted) {
-        adapter.poll(now, permitted && vehicle.allowed(now));
+        adapter.poll(now, permitted);
         if (peer < 0) peer = accept4(server, nullptr, nullptr, SOCK_NONBLOCK);
         if (peer < 0) return;
         char bytes[65536];
@@ -41,7 +40,6 @@ int main() {
                 if (json["op"] == "hello") event("{\"ev\":\"hello\",\"proto\":1,\"backend\":\"id7\",\"targets\":\"map:1088x480\",\"repeat\":1}");
                 if (json["op"] == "layer") {
                     assert(json["target"] == "map" && json["contend"] == "0" && json["exclusive"] == "0");
-                    assert(json["z"] == "-100" && json["guide_hold"] == "0");
                     layer = true;
                     event("{\"ev\":\"layer\",\"ref\":" + json["ref"] + ",\"state\":\"shown\"}");
                 }
@@ -54,17 +52,14 @@ int main() {
             input.erase(0, consumed);
         }
     };
-    for (int i=0; i<10; ++i) pump(i, true);
-    assert(!layer);
-    vehicle.update({true, 0, 10});
-    for (int i=10; i<100 && !layer; ++i) pump(i, true);
+    for (int i=0; i<100 && !layer; ++i) pump(i, true);
     assert(layer);
     for (int i=100; i<110; ++i) pump(i, true);
     std::vector<uint8_t> pixels(64*36*3/2, 128);
     assert(adapter.submit(pixels.data(), 64, 36, 1));
     for (int i=110; i<1000 && !frame; ++i) pump(i, true);
     assert(frame && adapter.submittedBytes == 1088*480*3/2);
-    for (int i=1000; i<1100 && !dropped; ++i) pump(i, true); // expires without an app update
+    for (int i=1000; i<1100 && !dropped; ++i) pump(i, false);
     assert(dropped);
     assert(!adapter.submit(pixels.data(), 64, 36, 2));
     close(peer); close(server); unlink(path.c_str());

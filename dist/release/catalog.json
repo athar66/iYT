@@ -4,7 +4,7 @@
     {
       "id": "iyt_app",
       "kind": "app",
-      "version": "0.5.0",
+      "version": "0.4.2",
       "title": "iYT",
       "description": "YouTube for BMW iDrive 7: search, signed-in shelves, native audio and hardware H.264 video.",
       "mguHmi": [
@@ -12,15 +12,15 @@
       ],
       "uninstallable": true,
       "requires": {
-        "iyt-daemon": "0.5.0",
+        "iyt-daemon": "0.4.2",
         "mgu-render": "0.6.11",
         "mgu-inputgate": "1.0.0"
       },
       "artifact": {
-        "name": "iyt_app@0.5.0.tgz",
-        "size": 1180224,
-        "sha256": "92968ac0c996a956875fac25195be3e39746022f453e72474f4b8a6778771b37",
-        "url": "https://github.com/athar66/iYT/releases/download/catalog/iyt_app%400.5.0.tgz"
+        "name": "iyt_app@0.4.2.tgz",
+        "size": 1178390,
+        "sha256": "29fdf91b112b82e85f763935833491263b04039f9d1b7ad0d1d26e4741616a8f",
+        "url": "https://github.com/athar66/iYT/releases/download/catalog/iyt_app%400.4.2.tgz"
       },
       "icon": "iyt_app.png",
       "iconSha256": "afbf63c28de964d4f249f062bdbddf853fe1e676cc8d62f59028ea0f1c6a9876"
@@ -28,11 +28,10 @@
     {
       "id": "iyt-daemon",
       "kind": "tool",
-      "version": "0.5.0",
+      "version": "0.4.2",
       "title": "iYT playback service",
       "description": "Native playback service with BMW platform audio bridge, hardware H.264 decoding and bundled on-demand QuickJS extraction.",
       "requires": {
-        "cluster-render": "0.4.2",
         "mgu-deploy": "0.7.0",
         "mgu-python": "1.0.2",
         "mgu-render": "0.6.11"
@@ -42,10 +41,10 @@
       ],
       "uninstallable": true,
       "artifact": {
-        "name": "iyt-daemon@0.5.0.tgz",
-        "size": 4503504,
-        "sha256": "63608265f38a2f5a1bc452c6f899d42c4df5376ab8182617253cf9f7dfa6db07",
-        "url": "https://github.com/athar66/iYT/releases/download/catalog/iyt-daemon%400.5.0.tgz"
+        "name": "iyt-daemon@0.4.2.tgz",
+        "size": 3861241,
+        "sha256": "d658e1b2b5b2b3b6b64944f764dd6df81e39a7be3ef65d101c44165b28dd2b21",
+        "url": "https://github.com/athar66/iYT/releases/download/catalog/iyt-daemon%400.4.2.tgz"
       }
     }
   ]

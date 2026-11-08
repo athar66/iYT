@@ -277,20 +277,8 @@ async function appFrames() {
     const disp = hu.display;
     // parked: the car reads 0 km/h (the video gate counts no speed as moving)
     let speedH = null;
-    const speedHandlers = [];
-    let gearH = null;
     let batH = null;
-    hu.ctx.signals = { watch: async (i, n, h, log, opts) => {
-        if (opts && opts.onAvailability) opts.onAvailability(true);
-        if (h && h.statusCarSpeed2) {
-            speedHandlers.push(h.statusCarSpeed2);
-            speedH = (v) => speedHandlers.forEach((fn) => fn(v));
-            h.statusCarSpeed2({ speedVehicleCentreOfGravity: 0 });
-        }
-        if (h && h.statusGearboxDrive) gearH = h.statusGearboxDrive;
-        if (h && h.statusBattery2) batH = h.statusBattery2;
-        return {};
-    } };
+    hu.ctx.signals = { watch: async (i, n, h) => { if (h && h.statusCarSpeed2) { speedH = h.statusCarSpeed2; speedH({ speedVehicleCentreOfGravity: 0 }); } if (h && h.statusBattery2) batH = h.statusBattery2; return {}; } };
     // (the stub's ctx predates these: as kit/mgu.js)
     hu.ctx.hideButton = (id, hide) => disp.hideButton(id, hide);
     hu.ctx.onPageFocus = (fn) => { disp.onPageFocus = fn; };
@@ -444,19 +432,6 @@ async function appFrames() {
         speedH({ speedVehicleCentreOfGravity: 0 });
         await sleep(300); await hu.loopFn();
         console.log('ok   podcast mode while driving: no picture, big controls, knob seek, Try again');
-        hu.ctx.settings.set('clusterVideo', true);
-        gearH({ statusActualStageDrive: 'P' });
-        speedH({ speedVehicleCentreOfGravity: 0 });
-        await sleep(300);
-        assert.strictEqual(d.cmds('display_mode').slice(-1)[0].mode, 'dual');
-        assert.strictEqual(d.cmds('cluster_vehicle').slice(-1)[0].park, true);
-        gearH({ statusActualStageDrive: 'N' });
-        await sleep(300);
-        assert.strictEqual(d.cmds('cluster_vehicle').slice(-1)[0].park, false);
-        hu.ctx.settings.set('clusterVideo', false);
-        await sleep(300);
-        assert.strictEqual(d.cmds('display_mode').slice(-1)[0].mode, 'main');
-        console.log('ok   native cluster setting: fresh Park enables dual; Neutral and setting off revoke output');
     } else console.log('skip full-screen player (the stub has no full-screen placement)');
     // back to the list (the overlay's back, or the bar's list button where the HMI runs the screen): DROP_VIDEO
     if (own) disp.pageTargets.find((t) => t.key === 'ov:back').run(); else hu.handlers.BTN_LIST();

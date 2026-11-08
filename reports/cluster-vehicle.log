@@ -1,2 +1,0 @@
-cluster vehicle: explicit Park, exact zero speed, invalid data, conflicts and freshness passed
-cluster vehicle: subscriptions and immediate provider-loss invalidation passed

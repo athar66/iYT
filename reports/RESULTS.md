@@ -35,9 +35,3 @@ Completed audio is handed to BMW MediaPlayer through a dedicated audio-only path
 Platform-runtime playback/account/thumbnail checks and the enhanced suites pass. Audio/container synthetic media tests pass; full online media-download and actual vehicle playback validation remain outstanding. Diagnostics now separate BMW audio/media rejection from native decoder errors and display selected format metadata without signed URLs.
 
 H.264 hardware decoding is unchanged; no software multi-format decoder has been introduced. Refresh Diagnostics after a failure to identify whether the remaining issue is audio access/parsing or native video decoding.
-
-## Version 0.5.0
-
-Production target builds now include the official cluster-render client and map-area route. The native HMI offers an optional Park-only map video setting, off by default. Explicit selector state and exact zero speed are validated for invalid values, conflicting sources, provider loss and two-second sample freshness. Heartbeats preserve source expiry; the native decoder requires a monotonic lease of at most 750 ms. Invalid state, hidden playback or missing heartbeats release the low-priority non-exclusive map layer and close only this client's renderer connection. No panel or HUD output is exposed.
-
-All 18 enhanced check groups and four platform Node8 bridge groups passed. Additional production-safety socket checks prove that missing state prevents a layer and expired state triggers its release. Target ELF and imported MSDK/VAAPI ABI checks pass. Store discovery, SDK-free packaging, synthetic donor linking and every artifact digest pass. Native-setting static audit passes. The real BMW HMI setting, signal freshness, physical video output, warning/navigation behavior and crash/power-loss restoration remain hardware tests; no vehicle deployment was performed here. The complete online media-download regression retains its existing skip.

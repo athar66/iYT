@@ -10,8 +10,8 @@
 | Playback state machine | Existing tested wire states retained; twelve-state replacement outstanding |
 | Main renderer | Existing MGVF path preserved with fork-specific name; target restart/permission validation outstanding |
 | Cluster integration | Official client library used; handshake/map-layer/frame/drop tested on local Unix socket |
-| Navigation/dual modes | Main plus map-area video available through the production native setting; firmware coexistence remains a hardware test |
-| Safety gating | Explicit gear/speed provider, fail-closed freshness and native lease; optional map-only hardware test output |
+| Navigation/dual modes | Implemented in native development router and simulator-only main integration; absent from production app settings |
+| Safety gating | Optional simulated state provider; real hardware cluster disabled |
 | Native UI | Graphite theme, branding and real diagnostics menu implemented; comprehensive redesign outstanding |
 | Settings | Original quality/fill/account options retained; motion override removed; expanded settings outstanding |
 | Diagnostics | Real RSS, Node/version, device-access, decoder stats/error reporting; unavailable data labelled unverified/null |

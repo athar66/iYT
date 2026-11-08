@@ -126,11 +126,3 @@ RideTube itself is GPL-3.0-or-later (LICENSE). The parts below come from others.
 
 RideTube is not affiliated with, endorsed by or sponsored by Google LLC or YouTube. YouTube is a trademark of
 Google LLC; the name is used only to say what service the app is a client for.
-
-
-cluster-render C++ client and protocol library
----------------------------------------------
-Copyright (C) 2026 Robert Nisipeanu. MPL-2.0.
-Source: https://github.com/robertnisipeanu/idrive-apps/tree/05e38eca8ca6f3bcde7e43d67127da664401caa8/native/cluster-render
-Unmodified client source and headers are in native/ytdec/src/cluster (relative to source/).
-The full MPL-2.0 license accompanies the installed service as cluster-render-MPL-2.0.txt.

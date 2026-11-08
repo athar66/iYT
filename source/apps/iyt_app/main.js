@@ -46,7 +46,6 @@ const QR = require('./kit/qr');
 const { setImage } = require('./kit/record');
 const { HMI } = require('./kit/display');
 const Parked = require('./kit/parked');
-const ClusterVehicle = require('./kit/cluster-vehicle');
 const { Ctl, Model, clock, SOCKET, FEEDS, SHELF_MAX } = require('./yt');
 const { spell } = require('./speller');
 
@@ -73,7 +72,6 @@ mgu.run({
     async start(ctx) {
         const { ui, settings, log } = ctx;
         const parked = Parked.watch(ctx, log, { strict: true });
-        const clusterVehicle = ClusterVehicle.watch(ctx, log);
         // Vehicle input is optional in the desktop simulator. Production remains fail closed.
         const simulator = process.env.RTE_SIMULATOR === '1';
         const noVideo = () => !simulator && parked.moving();
@@ -112,10 +110,7 @@ mgu.run({
                 ui.text('DIAG_STATUS', 'iYT ' + m.version + ' | ' + m.node +
                     ' | GPU: ' + m.gpuDevice + ' | acceleration: ' + m.hardwareAcceleration +
                     ' | memory: ' + (mb === null ? 'unavailable' : mb + ' MiB') +
-                    ' | output: ' + (settings.get('clusterVideo') ? 'iDrive and cluster map' : 'iDrive') +
-                    ' | cluster: ' + ((m.cluster && m.cluster.shown) ? 'showing map video' :
-                        (m.cluster && m.cluster.state ? m.cluster.state.status : 'not connected')) +
-                    ' | vehicle: ' + clusterVehicle.snapshot().reason +
+                    ' | output: iDrive | cluster: simulator only' +
                     (m.lastError ? ' | ' + m.lastError.code + ': ' + m.lastError.message : ''));
                 const video = (m.mediaFormats || {}).video, audio = (m.mediaFormats || {}).audio;
                 ui.text('DIAG_MEDIA', 'Video: ' + (video ? (video.vcodec || 'unknown') + ' ' + (video.width || '?') + 'x' + (video.height || '?') + ' at ' + (video.fps || '?') + ' fps' : 'not reported') +
@@ -314,10 +309,6 @@ mgu.run({
         function sync() {
             const shown = ui.isVisible('VIEW') && (!ui.hasFocus || ui.hasFocus('VIEW'));
             const want = mode === 'player' && shown && !noVideo();
-            const vehicle = clusterVehicle.snapshot();
-            ctl.send({cmd: 'display_mode', mode: settings.get('clusterVideo') ? 'dual' : 'main'});
-            ctl.send({cmd: 'cluster_vehicle', park: !!(want && settings.get('clusterVideo') && vehicle.allowed),
-                speed: vehicle.speed, expiresAt: vehicle.expiresAt});
             model.setWantVideo(want);
             // the file ytdec writes; a new one (ytdec restarted) is named to the renderer again
             let cur = null;
