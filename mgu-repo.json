@@ -11,7 +11,7 @@
         "ID7"
       ],
       "requires": {
-        "iyt-daemon": "0.5.1",
+        "iyt-daemon": "0.5.0",
         "mgu-render": "0.6.11",
         "mgu-inputgate": "1.0.0"
       },

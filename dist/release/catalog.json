@@ -4,7 +4,7 @@
     {
       "id": "iyt_app",
       "kind": "app",
-      "version": "0.5.1",
+      "version": "0.5.0",
       "title": "iYT",
       "description": "YouTube for BMW iDrive 7: search, signed-in shelves, native audio and hardware H.264 video.",
       "mguHmi": [
@@ -12,15 +12,15 @@
       ],
       "uninstallable": true,
       "requires": {
-        "iyt-daemon": "0.5.1",
+        "iyt-daemon": "0.5.0",
         "mgu-render": "0.6.11",
         "mgu-inputgate": "1.0.0"
       },
       "artifact": {
-        "name": "iyt_app@0.5.1.tgz",
-        "size": 1183135,
-        "sha256": "a60789283a1b416ab1691ff8809e38b81673536417e62ddc3dcd36a5fdf3020e",
-        "url": "https://github.com/athar66/iYT/releases/download/catalog/iyt_app%400.5.1.tgz"
+        "name": "iyt_app@0.5.0.tgz",
+        "size": 1180224,
+        "sha256": "92968ac0c996a956875fac25195be3e39746022f453e72474f4b8a6778771b37",
+        "url": "https://github.com/athar66/iYT/releases/download/catalog/iyt_app%400.5.0.tgz"
       },
       "icon": "iyt_app.png",
       "iconSha256": "afbf63c28de964d4f249f062bdbddf853fe1e676cc8d62f59028ea0f1c6a9876"
@@ -28,7 +28,7 @@
     {
       "id": "iyt-daemon",
       "kind": "tool",
-      "version": "0.5.1",
+      "version": "0.5.0",
       "title": "iYT playback service",
       "description": "Native playback service with BMW platform audio bridge, hardware H.264 decoding and bundled on-demand QuickJS extraction.",
       "requires": {
@@ -42,10 +42,10 @@
       ],
       "uninstallable": true,
       "artifact": {
-        "name": "iyt-daemon@0.5.1.tgz",
-        "size": 4503496,
-        "sha256": "fb587ab36d4e09c6ece8b6432ba736bf773056967e4ff16585c8462953887693",
-        "url": "https://github.com/athar66/iYT/releases/download/catalog/iyt-daemon%400.5.1.tgz"
+        "name": "iyt-daemon@0.5.0.tgz",
+        "size": 4503504,
+        "sha256": "63608265f38a2f5a1bc452c6f899d42c4df5376ab8182617253cf9f7dfa6db07",
+        "url": "https://github.com/athar66/iYT/releases/download/catalog/iyt-daemon%400.5.0.tgz"
       }
     }
   ]

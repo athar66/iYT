@@ -19,13 +19,13 @@ try {
     catch { if ([int]$_.Exception.Response.StatusCode -ne 404) { throw } }
     if ($catalogRelease -and -not $UpdateCatalog) { throw 'Use -UpdateCatalog to update the existing release while preserving its previous assets' }
     $body = @{
-        tag_name='catalog';target_commitish='main';name='iYT 0.5.1';draft=$true;prerelease=$false
-        body="iYT 0.5.1 adds visible Search, Settings and Exit buttons and a separate native Settings screen. Search stops playback and releases the video overlay and controller while BMW's keyboard is open, including on a fresh launch. Duplicate opens and old completion events are guarded; setup failures can be retried. Closing or exiting stops playback and disconnects the service; reopening does not resume it automatically. Adds an optional direct BMW controller-signal fallback with duplicate protection; Diagnostics reports its input source. The old sidebar Search target is removed. Guarded map-only cluster output is retained. Host and packaging checks pass; confirm touch alignment, keyboard and rotary operation on the actual firmware. Update both app and service. Earlier packages remain available for rollback."
+        tag_name='catalog';target_commitish='main';name='iYT 0.5.0';draft=$true;prerelease=$false
+        body="iYT 0.5.0 enables optional video in the ID7 cluster map area for real-hardware testing. Update both the app and playback service, then enable Settings > Cluster map video (Park only). Requires cluster-render 0.4.2 or newer. Explicit Park and exactly zero speed must remain fresh; invalid, conflicting or lost signals stop cluster video. A native short lease also stops output when app updates stop. The map layer does not contend with the OEM slot, is non-exclusive and sits below other content. No panel or HUD output. Host tests and target ABI checks pass; actual vehicle playback and restoration still require testing. The 0.4.2 audio handoff fix is retained. Previous packages remain available for rollback."
     } | ConvertTo-Json
     $release = if ($catalogRelease) { $catalogRelease } else { Invoke-RestMethod -Method Post -Headers $headers -ContentType 'application/json' -Body $body "https://api.github.com/repos/$repoName/releases" }
     $uploadBase = ($release.upload_url -split '\{')[0]
     $assets = @{}
-    foreach ($name in @('iyt_app@0.5.1.tgz','iyt-daemon@0.5.1.tgz','iyt_app.png','mgu-store.json')) {
+    foreach ($name in @('iyt_app@0.5.0.tgz','iyt-daemon@0.5.0.tgz','iyt_app.png','mgu-store.json')) {
         $file = Join-Path $releaseDir $name
         $present = @($release.assets | Where-Object name -eq $name)
         if ($present.Count) {

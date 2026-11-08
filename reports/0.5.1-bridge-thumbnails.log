@@ -1,7 +1,0 @@
-ok baseline 320x180
-ok baseline 480x360 resampled
-skip progressive (no jpegtran)
-ok bad id
-ok online dQw4w9WgXcQ
-ok online 404
-test_thumb: all ok

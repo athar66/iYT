@@ -10,7 +10,6 @@ iYT combines an iDrive interface with BMW's native audio playback and Intel hard
 - Continue watching and access subscriptions and Watch later.
 - Control playback, seek and select video quality using the iDrive controller.
 - View playback and service diagnostics.
-- Open Search, Settings and Exit from dedicated buttons. Leaving the app stops playback.
 - Play audio through the vehicle's media system.
 - Show video on the main display while parked.
 

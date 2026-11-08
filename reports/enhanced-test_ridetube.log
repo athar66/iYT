@@ -63,17 +63,5 @@ text BTN_LIST "Results"
 text BTN_PLAY "Pause"
 text BTN_PLAY "Play"
 ok   autoplay: the next video in the row, 5 s after the end
-text BTN_S1 "test query"
-text BTN_S2 "News"
-text BTN_S3 "Music"
-text BTN_S4 "Cars"
-text BTN_S5 "Podcasts"
-text BTN_S6 "Comedy"
-text BTN_LIST "Now playing"
-open VIEW
-text BTN_LIST "Player"
-text BTN_ACCOUNT "Sign in"
-open VIEW
-ok   Search yields overlay/controller, ignores duplicate opens and sends query; closing app disconnects playback
 ok   channel search: a letter = the names starting with it, a word = the names (or handles) holding it
 ok   extras: Continue watching, positions, chapters, the skipped toast

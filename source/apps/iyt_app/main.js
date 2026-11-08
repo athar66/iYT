@@ -32,8 +32,11 @@
  *   MAIN  HMI menu (Search): the HMI's speller, Now playing, Results, Home, Subscriptions, Watch later, recent
  *         searches / suggestions, then Sign in / Sign out (pressed twice).
  *
- * Vehicle checks gate video. Search releases rendering and controller capture for BMW's keyboard.
- * Leaving or exiting stops playback and closes the service connection. Settings has its own screen.
+ * Video only while parked (kit parked.js), unless the "Video while driving" setting is on (for a car coded
+ * for video in motion): driving off turns the picture off (daemon `video off`,
+ * renderer DROP_VIDEO), the sound plays on; parked again, it comes back. The app stays ACTIVE
+ * while hidden as long as sound plays (ctx.background), because closing the socket stops playback.
+ * Never exits: every handler logs its errors.
  */
 const fs = require('fs');
 const path = require('path');
@@ -45,7 +48,7 @@ const { HMI } = require('./kit/display');
 const Parked = require('./kit/parked');
 const ClusterVehicle = require('./kit/cluster-vehicle');
 const { Ctl, Model, clock, SOCKET, FEEDS, SHELF_MAX } = require('./yt');
-const { spell, cancel: cancelSpell } = require('./speller');
+const { spell } = require('./speller');
 
 const W = 1600, H = 520;
 const BOX = { x: 12, y: 38, w: 1576, h: 432 };          // the video, in the page's visible part (y 38..520)
@@ -79,64 +82,7 @@ mgu.run({
         const ctl = new Ctl(process.env.MGU_YT_SOCKET || SOCKET, log);
         const model = new Model((o) => ctl.send(o));
         let mode = 'home', browse = 'home', dirty = true;   // browse: the list the player goes back to
-        let keyboardBusy = false, exited = false, closingViews = false, sawVisible = false, leaveTimer = null;
-        const changed = () => { dirty = true; labels(); };
-        const appStates = ['VIEW', 'MAIN', 'DIAG', 'SETTINGS'];
-        const anyVisible = () => appStates.some((name) => ui.isVisible(name));
-        sawVisible = anyVisible();
-        function stopPlayback() {
-            model.setWantVideo(false);
-            ctl.send({cmd: 'cluster_vehicle', park: false});
-            ctl.send({cmd: 'display_mode', mode: 'main'});
-            ctl.send({cmd: 'video', on: false});
-            ctl.send({cmd: 'stop'});
-            if (ctx.display && ctx.display.gpu) ctx.display.gpu.dropVideo(VID);
-            ino = null; videoShown = false;
-            if (ctx.background) ctx.background('playing', false);
-        }
-        function leaveApp() {
-            exited = true;
-            if (ctx.display && ctx.display.suspend) ctx.display.suspend('appHidden', true);
-            cancelSpell(ctx.app);
-            stopPlayback();
-            ctl.close();
-            if (mode === 'player') mode = browse;
-        }
-        async function exitApp() {
-            closingViews = true;
-            clearTimeout(leaveTimer);
-            leaveApp();
-            if (ctx.display && ctx.display.closeSheet) ctx.display.closeSheet();
-            try { for (const name of ['SETTINGS', 'DIAG', 'MAIN', 'VIEW']) { if (ui.isVisible(name)) await ui.close(name); } }
-            finally { closingViews = false; }
-        }
-        function resumeApp() {
-            if (closingViews || !exited) return;
-            exited = false;
-            if (ctx.display && ctx.display.suspend) ctx.display.suspend('appHidden', false);
-            ctl.reopen();
-        }
-        function visibilityChanged(name, on) {
-            clearTimeout(leaveTimer);
-            if (closingViews) return;
-            if (anyVisible()) {
-                sawVisible = true;
-                if (on === true) resumeApp();
-            } else if (sawVisible && !keyboardBusy) {
-                leaveTimer = setTimeout(() => { if (!anyVisible() && !keyboardBusy) leaveApp(); }, 500);
-            }
-        }
-        if (ctx.app && ctx.app.on) {
-            ctx.app.on('changeVisibility', (v) => {
-                if (v && v.visible === false && !keyboardBusy) leaveApp();
-                else if (v && v.visible === true) resumeApp();
-            });
-            ctx.app.on('shutdown', () => leaveApp());
-        }
-        ui.onVisible(visibilityChanged);
-        ctx.signals.watch('de.bmw.infotainment.controlelements.FrontCCU', '1', {
-            statusRotaryEncoderState: (v) => { if (ctx.controller && ctx.controller.fallback) ctx.controller.fallback(v); },
-        }, log).catch((e) => log.warn('controller fallback: ' + e.message));
+        const changed = () => { dirty = true; if (ctx.background) ctx.background('playing', model.active()); labels(); };
         const isFeed = (m) => FEEDS.indexOf(m) >= 0;
         // a feed tab: signed in, (re)load it; signed out, ask for a sign-in code (the daemon says the one shown again).
         // A new device flow starts only from here (show), the account button or the page's "tap" - never on its own
@@ -170,7 +116,6 @@ mgu.run({
                     ' | cluster: ' + ((m.cluster && m.cluster.shown) ? 'showing map video' :
                         (m.cluster && m.cluster.state ? m.cluster.state.status : 'not connected')) +
                     ' | vehicle: ' + clusterVehicle.snapshot().reason +
-                    ' | controller: ' + (ctx.display.inputSource || 'no events received') +
                     (m.lastError ? ' | ' + m.lastError.code + ': ' + m.lastError.message : ''));
                 const video = (m.mediaFormats || {}).video, audio = (m.mediaFormats || {}).audio;
                 ui.text('DIAG_MEDIA', 'Video: ' + (video ? (video.vcodec || 'unknown') + ' ' + (video.width || '?') + 'x' + (video.height || '?') + ' at ' + (video.fps || '?') + ' fps' : 'not reported') +
@@ -218,37 +163,9 @@ mgu.run({
         ui.onClick('BTN_DIAG', () => { ui.open('DIAG'); ctl.send({cmd: 'diagnostics'}); });
         ui.onClick('BTN_DIAG_REFRESH', () => ctl.send({cmd: 'diagnostics'}));
         ui.onClick('BTN_DIAG_BACK', () => ui.open('MAIN'));
-        async function openSearch(kind) {
-            if (keyboardBusy || exited) return;
-            keyboardBusy = true;
-            stopPlayback();
-            if (ctx.background) ctx.background('keyboard', true);
-            if (ctx.display && ctx.display.suspend) ctx.display.suspend('keyboard', true);
-            try {
-                const text = await spell(ctx.app, kind === 'channel' ? 'Find a channel' : 'Search videos');
-                if (!exited) {
-                    if (text && text.trim() && kind === 'channel') {
-                        chanQ = text.trim(); vs('subs').sy = 0; vs('subs').off = {}; dirty = true;
-                        show('subs'); await ui.open('VIEW');
-                    } else if (text && text.trim()) search(text);
-                    else await ui.open('VIEW');
-                }
-            } catch (e) {
-                log.warn('speller: ' + (e.message || e));
-                if (!exited) { await ui.text('MAIN_INFO', 'The keyboard did not open. Select Search to try again.'); await ui.open('MAIN'); }
-            } finally {
-                keyboardBusy = false;
-                if (ctx.background) ctx.background('keyboard', false);
-                if (ctx.display && ctx.display.suspend) ctx.display.suspend('keyboard', false);
-                dirty = true;
-                visibilityChanged();
-            }
-        }
-        const openSettings = () => { stopPlayback(); return ui.open('SETTINGS'); };
-        ui.onClick('BTN_SEARCH', openSearch);
-        ui.onClick('BTN_MENU_SETTINGS', openSettings);
-        ui.onClick('BTN_EXIT', exitApp);
-        ui.onClick('BTN_MENU_EXIT', exitApp);
+        ui.onClick('BTN_SEARCH', () => spell(ctx.app, 'Search videos')
+            .then((t) => search(t))
+            .catch((e) => { log.error('speller', e); ui.text('MAIN_INFO', 'The keyboard did not open: ' + (e.message || e)); }));
         SLOTS.forEach((b, i) => ui.onClick(b, () => search(slots()[i])));
         ui.onClick('BTN_NOW', () => { show('player'); ui.open('VIEW'); });
         ui.onClick('BTN_RESULTS', () => { show('results'); ui.open('VIEW'); });
@@ -321,11 +238,10 @@ mgu.run({
         ui.onClick('BTN_FF', () => model.skip(10000));
         ui.onClick('BTN_LIST', () => show(mode === 'player' ? browse : 'player'));
         if (ctx.onTab) ctx.onTab((i) => { if (TABS[i]) show(TABS[i]); });
-        ui.onClick('BTN_FIND', openSearch);
-        ui.onClick('BTN_MENU', () => ui.open('MAIN'));
+        ui.onClick('BTN_FIND', () => ui.open('MAIN'));
         // where the kit runs the screen: no bar at all (the rail and the player's overlay do its jobs), so the
         // pages reach the screen's bottom; the HMI's own screen keeps all five
-        if (ctx.hideButton) ['BTN_PLAY', 'BTN_RW', 'BTN_FF', 'BTN_LIST', 'BTN_FIND', 'BTN_SETTINGS', 'BTN_EXIT', 'BTN_MENU'].forEach((b) => ctx.hideButton(b, true));
+        if (ctx.hideButton) ['BTN_PLAY', 'BTN_RW', 'BTN_FF', 'BTN_LIST', 'BTN_FIND'].forEach((b) => ctx.hideButton(b, true));
         labels();
 
         /* ---------- the player's overlay (where the kit runs the screen): shown on a tap or the controller ---------- */
@@ -397,7 +313,7 @@ mgu.run({
         const gpu = () => (ctx.display && ctx.display.gpu && ctx.display.gpu.native ? ctx.display.gpu : null);
         function sync() {
             const shown = ui.isVisible('VIEW') && (!ui.hasFocus || ui.hasFocus('VIEW'));
-            const want = !exited && !keyboardBusy && mode === 'player' && shown && !noVideo();
+            const want = mode === 'player' && shown && !noVideo();
             const vehicle = clusterVehicle.snapshot();
             ctl.send({cmd: 'display_mode', mode: settings.get('clusterVideo') ? 'dual' : 'main'});
             ctl.send({cmd: 'cluster_vehicle', park: !!(want && settings.get('clusterVideo') && vehicle.allowed),
@@ -499,17 +415,14 @@ mgu.run({
         const PLAYING = ['player', 'Playing', (cv, x, y, c) => { [10, 20, 14].forEach((h, k) => cv.roundRect(x - 15 + k * 11, y + 8 - h, 8, h + 8, 2, c)); }];
         function drawRail(cv) {
             const sel = mode === 'results' ? 'search' : mode === 'channel' ? 'subs' : mode, bottom = H + (cv.own ? cv.extra : 0);
-            const navigation = RAIL.filter((item) => item[0] !== 'search').concat([
-                ['menu', 'Menu', (r, x, y, c) => { [-12, 0, 12].forEach((dx) => r.circle(x + dx, y, 4, c)); }],
-            ]);
-            const items = cv.own && model.active() ? navigation.concat([PLAYING]) : navigation;
+            const items = cv.own && model.active() ? RAIL.concat([PLAYING]) : RAIL;
             const pitch = Math.min(100, (bottom - 156) / (items.length - 1));   // (the page down to the screen's bottom where it reaches)
             items.forEach(([m, name, glyph], i) => {
                 const cx = 62, cy = 96 + Math.round(i * pitch), on = m === sel, bg = on ? '#2c2c2c' : C.bg, c = on ? '#ffffff' : C.dim;
                 if (on) { cv.roundRect(18, cy - 38, 90, 84, 16, bg); cv.roundRect(18, cy - 14, 5, 28, 2.5, C.red); }
                 glyph(cv, cx, cy - 8, c, bg);
                 cv.text(name === 'Subscriptions' ? 'Subs' : name, cx, cy + 34, 18, c, { literal: true, align: 'center', font: on ? 'bold' : 'label' });
-                if (cv.own) cv.target(18, cy - 38, 90, 84, () => (m === 'menu' ? ui.open('MAIN') : show(m)), 'rail:' + m, 16);
+                if (cv.own) cv.target(16, cy - 38, 92, 84, () => (m === 'search' ? ui.open('MAIN') : show(m)), 'rail:' + m, 16);
             });
         }
 
@@ -576,7 +489,11 @@ mgu.run({
         // the channels, filtered by chanQ (the keyboard: one letter = names starting with it, else names holding it)
         let chanQ = '';
         function findChannel() {
-            return openSearch('channel');
+            spell(ctx.app, 'Find a channel').then((t) => {
+                if (t === null || t === undefined) { ui.open('VIEW'); return; }
+                chanQ = String(t).trim(); vs('subs').sy = 0; vs('subs').off = {}; dirty = true;
+                show('subs'); ui.open('VIEW');
+            }).catch((e) => log.error('speller', e));
         }
         let chanFrom = 'subs';
         function openChannel(c) { if (mode !== 'channel') chanFrom = mode; model.openChannel(c.id, c.title); show('channel'); vs('channel').sy = 0; vs('channel').off = {}; }
@@ -1033,7 +950,6 @@ mgu.run({
         }
         let last = null, lastRev = -1, lastT = 0, upNext = null;
         function render() {
-            if (keyboardBusy || exited) return Promise.resolve();
             const now = Date.now();
             upNext = autoNext();
             // redraw on a change (and 4 times a second); unchanged, the same frame again keeps the layer alive (>= 1 message/s)
@@ -1048,17 +964,11 @@ mgu.run({
                     // where the kit runs the screen the rail has the pages: the header shows just the name
                     if (cv.own) G.frame(cv, ctx.theme(), [], -1); else G.frame(cv, ctx.theme(), TABS.map((m) => NAMES[m]), TABS.indexOf(mode));
                 }
-                [['Search', openSearch, 'search'], ['Settings', openSettings, 'settings'], ['Exit', exitApp, 'exit']].forEach(([label, action, key], i) => {
-                    const x = W - 404 + i * 132, y = TOP + 8;
-                    cv.roundRect(x, y, 124, 44, 10, focusKey === 'action:' + key ? C.red : C.card);
-                    cv.text(label, x + 62, y + 29, 22, C.text || '#ffffff', {literal: true, align: 'center', font: 'bold'});
-                    if (cv.own) cv.target(x, y, 124, 44, action, 'action:' + key, 10, undefined, 1);
-                });
                 last = cv;
             }
             return ui.image('VIEW_GFX', last);
         }
         ctx.loop('VIEW', 10, render);
-        log.info('iYT app started');
+        log.info('ridetube app started');
     },
 });

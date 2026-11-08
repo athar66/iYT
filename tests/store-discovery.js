@@ -27,12 +27,12 @@ function walk(dir, prefix = '') {
     const app = catalog.components[0];
     assert.equal(app.title, 'iYT');
     assert.equal(app.script.sdk, 'source/oap-sdk');
-    assert.equal(app.requires['iyt-daemon'], '0.5.1');
+    assert.equal(app.requires['iyt-daemon'], '0.5.0');
     const tool = catalog.components[1];
     const packed = store.packComponent(tool, walk(path.join(root, tool.path)));
     assert(packed.length > 1000000);
     fs.mkdirSync(path.join(root, 'dist/release'), {recursive: true});
-    fs.writeFileSync(path.join(root, 'dist/release/iyt-daemon@0.5.1.tgz'), packed);
+    fs.writeFileSync(path.join(root, 'dist/release/iyt-daemon@0.5.0.tgz'), packed);
     fs.writeFileSync(path.join(root, 'reports/store-discovery.json'), JSON.stringify({
         parser: 'MGU Store upstream repoCatalog + packComponent',
         components: catalog.components.map(c => ({id: c.id, title: c.title, version: c.version, requires: c.requires})),

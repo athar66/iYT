@@ -41,7 +41,7 @@ component['files'].append({'path': 'extractor.json', 'from': 'prebuilt/extractor
 manifest = {'schema': 1, 'components': [
     {'id': 'iyt_app', 'kind': 'app', 'path': 'source/apps/iyt_app', 'title': 'iYT',
      'description': 'YouTube for BMW iDrive 7 with native audio and hardware H.264 video.',
-     'mguHmi': ['ID7'], 'requires': {'iyt-daemon': '0.5.1', 'mgu-render': '0.6.11', 'mgu-inputgate': '1.0.0'},
+     'mguHmi': ['ID7'], 'requires': {'iyt-daemon': '0.5.0', 'mgu-render': '0.6.11', 'mgu-inputgate': '1.0.0'},
      'build': {'python': 'source/kit/tools/build.py', 'args': ['{id}'], 'sdk': 'source/oap-sdk',
                'output': 'source/dist/{id}@{version}.tgz'}},
     {'id': 'iyt-daemon', 'kind': 'tool', 'path': 'source/native/iyt-daemon', 'title': 'iYT playback service', 'mguHmi': ['ID7'], 'uninstallable': True}

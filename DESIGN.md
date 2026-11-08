@@ -10,5 +10,3 @@ Canonical runtime tokens: `source/apps/iyt_app/theme.js` → main.js canvas prim
 Typography: existing bold atlas for titles/selection; label atlas for supporting metadata; existing numeric glyphs for playback time. Thumbnail geometry and 56-image pool stay bounded. Focus uses existing outlined tiles and selection rail, without adding animations. This pass changes palette and branding; a complete redesign is not claimed.
 
 UK English is the development locale. Existing localisation remains upstream-owned. Visual rendering and physical controller checks need the SDK/emulator and car; host runtime tests cannot establish visual acceptance.
-
-Persistent Search, Settings and Exit actions use the existing graphite canvas tokens and native fonts. The visible rounded button bounds also define their touch targets and take priority over the player's invisible wake region. The sidebar Menu retains secondary account and diagnostic actions. Settings uses a separate native HMI screen.

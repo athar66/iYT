@@ -1,7 +1,0 @@
-{
-  "runtime": "Node8.16.2",
-  "command": "node source/kit/tools/test_ridetube.js",
-  "code": 0,
-  "scenarios": ["keyboard handoff during playback", "keyboard handoff without playback", "duplicate Search", "confirmation and cancellation", "hidden app disconnect", "cached reopen", "Exit closes screen and connection", "screen-visibility-only closure"],
-  "hardwareValidated": false
-}

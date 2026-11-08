@@ -541,8 +541,7 @@ async function runInner(impl) {
          */
         // onInput(fn): while grabbed, fn gets each controller event the HMI didn't (same fields
         // as FrontCCU.statusRotaryEncoderState, enums as numbers)
-        controller: { grab(on) { display.grab(on); }, onInput(fn) { display.onCcu = fn; },
-            fallback(v) { display.controllerFallback(v); } },
+        controller: { grab(on) { display.grab(on); }, onInput(fn) { display.onCcu = fn; } },
         /**
          * onTab(fn): fn(i) when page tab i is tapped on the touchscreen (renderer with touch
          * routing), or pressed with the controller after turning onto it. Where the kit runs the
