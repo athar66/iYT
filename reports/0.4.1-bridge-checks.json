@@ -7,7 +7,7 @@
   {
     "test": "bridge-daemon",
     "runtime": "Node8.16.2 platform compatibility",
-    "code": 0
+    "code": 1
   },
   {
     "test": "bridge-thumbnails",

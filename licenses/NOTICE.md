@@ -5,3 +5,7 @@ iYT is a modified RideTube, GPL-3.0-or-later, based on the exact revision in ups
 Cluster client/protocol source: Robert Nisipeanu, MPL-2.0, unmodified, from the pinned iDrive Apps repository. MPL text is included. Other original notices remain in source/THIRD_PARTY_LICENSES, source/kit/LICENSE and source/native/ytdec/abi/include/mfx/LICENSE. No BMW SDK or firmware binary is redistributed.
 
 New project code is GPL-3.0-or-later unless its file states otherwise. All corresponding modified source and build scripts are included in the source distribution. Target-ABI-checked deployment binaries and SDK-free Store artifacts are included; installation on real hardware has not been validated.
+
+## 2026-11-08 playback handoff changes
+
+Audio-only publication and cleanup, selected-format instrumentation, and separate MediaPlayer/decoder diagnostics are modified iYT code under GPL-3.0-or-later. Existing copyright and third-party licence notices remain intact.

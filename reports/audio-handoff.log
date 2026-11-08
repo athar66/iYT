@@ -1,0 +1,2 @@
+Cross-uid read requires root; file modes and inode identity verified.
+Audio export: no media copy, private cache preserved, cleanup/recovery and ownership guards passed.

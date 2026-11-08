@@ -30,7 +30,10 @@ ok   preparing on the head: pct moves with the video lead
 ok   seek past the head before audio.m4a: buffering, no setTime on the head; audio_ready -> playFile + setTime there
 ok   paused on the head when audio.m4a arrives: no switch until resume, which plays audio.m4a at that point
 ok   stop during the switch: release waits for the playFile, no setTime after, audio released
-ok   a new play during the switch: the old switch does nothing more, the new video plays
+FAIL a new play during the switch: the old switch does nothing more, the new video plays
+AssertionError [ERR_ASSERTION]: '/tmp/ytd-xEOEDN/audio/session-e618ae4e09da58856c7a8130c3cd34e8/audio.m4a' === '/tmp/ytd-xEOEDN/cache/DemoVideo01/audio.m4a'
+    at t (/mnt/f/APPS/iDrive Toolkit/iYT/source/native/iyt-daemon/test/test_ytd.js:741:16)
+    at <anonymous>
 ok   fetcher dies while only the head is there: error state, audio released
 ok   zoom while playing: ytdec again with the other mode at the clock, no error; same mode does nothing
 ok   quality while playing: fetched again at that height; same height: nothing

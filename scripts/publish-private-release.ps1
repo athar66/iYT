@@ -19,13 +19,13 @@ try {
     catch { if ([int]$_.Exception.Response.StatusCode -ne 404) { throw } }
     if ($catalogRelease -and -not $UpdateCatalog) { throw 'Use -UpdateCatalog to update the existing release while preserving its previous assets' }
     $body = @{
-        tag_name='catalog';target_commitish='main';name='iYT 0.4.1';draft=$true;prerelease=$false
-        body="iYT 0.4.1 fixes the sign-in DNS callback error (Invalid IP address: undefined), restores the platform Node8 bridge for BMW native-addon compatibility, removes the jap-node22 dependency, bundles target-ABI-checked QuickJS for on-demand extraction and disables the idle Python extraction worker. The bridge still uses iDrive's existing Node runtime; this is not a completely Node-free service. DNS regression, platform bridge/account tests, TV-page uplink requests and live QuickJS extraction metadata checks passed. Update both iYT and iYT playback service through MGU Store. Real-vehicle sign-in and playback require verification; real cluster video remains disabled. Previous package assets are retained for rollback. Source and licences are in the repository."
+        tag_name='catalog';target_commitish='main';name='iYT 0.4.2';draft=$true;prerelease=$false
+        body="iYT 0.4.2 publishes completed audio through a dedicated, randomly named handoff readable by BMW MediaPlayer without exposing the private download cache. Hard links avoid media copies, with bounded ownership manifests and cleanup. A cross-account Linux test reproduces the original file-access denial and verifies the handoff. Diagnostics show selected formats and distinguish BMW MediaPlayer rejection from native decoder failure. This fixes a confirmed permission gap; the reported vehicle failure still requires verification. H.264 hardware decoding is unchanged; no software multi-format decoder was added. Update iYT and its playback service. Node22 remains unnecessary. Previous packages remain available for rollback."
     } | ConvertTo-Json
     $release = if ($catalogRelease) { $catalogRelease } else { Invoke-RestMethod -Method Post -Headers $headers -ContentType 'application/json' -Body $body "https://api.github.com/repos/$repoName/releases" }
     $uploadBase = ($release.upload_url -split '\{')[0]
     $assets = @{}
-    foreach ($name in @('iyt_app@0.4.1.tgz','iyt-daemon@0.4.1.tgz','iyt_app.png','mgu-store.json')) {
+    foreach ($name in @('iyt_app@0.4.2.tgz','iyt-daemon@0.4.2.tgz','iyt_app.png','mgu-store.json')) {
         $file = Join-Path $releaseDir $name
         $present = @($release.assets | Where-Object name -eq $name)
         if ($present.Count) {

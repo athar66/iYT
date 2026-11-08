@@ -772,11 +772,18 @@ def extract_cmd(a):
     return 0
 
 
+def media_format(info):
+    """Diagnostics only: never publish signed stream URLs, headers or cookies."""
+    fields = ('format_id', 'vcodec', 'acodec', 'ext', 'protocol', 'width', 'height', 'fps', 'asr', 'audio_channels')
+    return {key: info[key] for key in fields if info.get(key) is not None}
+
+
 def audio_ranged(a, ya, info, meta):
     """The audio format yt-dlp picks, fetched with ranged_get; audio.head.m4a + audio_head once the prefix
     covers max(HEAD_MIN_MS, 1.5x the rest's estimated time). None when the format is not plain https with a size."""
     f = ya.process_ie_result(copy.deepcopy(info), download=False)
     f = (f.get('requested_downloads') or [f])[0]
+    emit(ev='format', kind='audio', format=media_format(f))
     total = f.get('filesize')
     if f.get('protocol') not in ('https', 'http') or not total or not f.get('url'):
         return None
@@ -891,6 +898,8 @@ def fetch(a):
 
     def video():
         try:
+            selected = yv.process_ie_result(copy.deepcopy(info), download=False)
+            emit(ev='format', kind='video', format=media_format((selected.get('requested_downloads') or [selected])[0]))
             yv.process_ie_result(copy.deepcopy(info), download=True)
         except BaseException as e:  # noqa: BLE001
             fail(f'video: {yv.params["logger"].last or e}')

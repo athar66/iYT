@@ -1,7 +1,7 @@
 {
   "id": "iyt-daemon",
   "kind": "tool",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "license": "GPL-3.0-or-later",
   "title": "iYT playback service",
   "description": "Native playback service with BMW platform audio bridge, hardware H.264 decoding and bundled on-demand QuickJS extraction.",
@@ -95,6 +95,11 @@
     {
       "path": "QuickJS-MIT.txt",
       "from": "QuickJS-MIT.txt",
+      "mode": "0644"
+    },
+    {
+      "path": "audio-files.js",
+      "from": "audio-files.js",
       "mode": "0644"
     }
   ],

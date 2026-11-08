@@ -2,7 +2,7 @@
   "id": "iyt_app",
   "title": "iYT",
   "description": "YouTube for BMW iDrive 7: search, signed-in shelves and native audio playback. Picture while parked; optional cluster simulator output.",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "license": "GPL-3.0-or-later",
   "vendor": "custom",
   "loggingId": "OARE",
@@ -142,6 +142,21 @@
           "text",
           "DIAG_STATUS",
           "Choose Refresh to read current status"
+        ],
+        [
+          "text",
+          "DIAG_MEDIA",
+          "Video and audio formats: not reported"
+        ],
+        [
+          "text",
+          "DIAG_AUDIO",
+          "BMW MediaPlayer: no rejection recorded"
+        ],
+        [
+          "text",
+          "DIAG_DECODER",
+          "Video decoder: no error recorded"
         ],
         [
           "button",

@@ -57,59 +57,64 @@
     "suite": "enhanced",
     "test": "test_runtime",
     "code": 0,
-    "duration_s": 11.737
+    "duration_s": 11.808
   },
   {
     "suite": "enhanced",
     "test": "test_life",
     "code": 0,
-    "duration_s": 0.076
+    "duration_s": 0.084
   },
   {
     "suite": "enhanced",
     "test": "test_parked",
     "code": 0,
-    "duration_s": 0.071
+    "duration_s": 0.079
   },
   {
     "suite": "enhanced",
     "test": "test_qr",
     "code": 0,
-    "duration_s": 0.13
+    "duration_s": 0.131
   },
   {
     "suite": "enhanced",
     "test": "test_ridetube",
     "code": 0,
-    "duration_s": 22.808
+    "duration_s": 22.963
   },
   {
     "suite": "enhanced",
     "test": "daemon",
     "code": 0,
-    "duration_s": 28.092
+    "duration_s": 28.243
   },
   {
     "suite": "enhanced",
     "test": "thumbnails",
     "code": 0,
-    "duration_s": 0.668
+    "duration_s": 1.095
   },
   {
     "suite": "enhanced",
     "test": "media",
     "code": 0,
-    "duration_s": 9.947
+    "duration_s": 9.862
   },
   {
     "suite": "enhanced",
     "test": "native",
     "code": 0,
-    "duration_s": 1.672
+    "duration_s": 1.732
   },
   {
     "suite": "enhanced",
     "test": "regressions",
+    "code": 0
+  },
+  {
+    "suite": "enhanced",
+    "test": "audio-handoff",
     "code": 0
   },
   {

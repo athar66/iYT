@@ -1,5 +1,8 @@
-.........s....
+.........s{"ev": "format", "kind": "audio", "format": {"protocol": "m3u8_native"}}
+{"ev": "format", "kind": "audio", "format": {"protocol": "http"}}
+{"ev": "format", "kind": "audio", "format": {"protocol": "http"}}
+....
 ----------------------------------------------------------------------
-Ran 14 tests in 9.742s
+Ran 14 tests in 9.608s
 
 OK (skipped=1)

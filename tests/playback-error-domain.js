@@ -1,0 +1,12 @@
+'use strict';
+const assert=require('assert');
+const Daemon=require('../source/native/iyt-daemon/ytd').Daemon;
+const receiver={ticking:true,log:function(){},failPlayback:function(message){this.failure=message;return Promise.resolve();}};
+Daemon.prototype.onPlaybackError.call(receiver,'Event: video not playable');
+assert.equal(receiver.failure,'BMW MediaPlayer rejected audio: "Event: video not playable"');
+assert.equal(receiver.lastMediaPlayerError.event,'Event: video not playable');
+const child={}; receiver.child=child;
+Daemon.prototype.onYtdecLine.call(receiver,child,JSON.stringify({ev:'error',msg:'MFX_ERR_UNSUPPORTED'}));
+assert.equal(receiver.lastDecoderError.message,'MFX_ERR_UNSUPPORTED');
+assert.equal(receiver.lastMediaPlayerError.event,'Event: video not playable');
+console.log('BMW MediaPlayer rejection and native decoder failure remain separate diagnostic domains.');

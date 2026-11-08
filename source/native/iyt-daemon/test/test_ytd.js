@@ -45,7 +45,20 @@ const someip = {
         subscribe: (s) => { subs[s.name] = s.onReceive; },
         getValue: async (n) => { assert.strictEqual(n, 'listOfMainConnections'); return conns.slice(); },
         callMethod: async (m, a) => {
-            calls.push({ inst: inst, m: m, a: a });
+            const call = { inst: inst, m: m, a: a };
+            if (m === 'playFile') {
+                assert.ok(a.path.indexOf(path.join(tmp, 'audio') + path.sep) === 0, 'BMW reads the dedicated audio handoff');
+                const published = fs.statSync(a.path);
+                for (const id of fs.readdirSync(cache)) {
+                    const original = path.join(cache, id, path.basename(a.path));
+                    try {
+                        const st = fs.statSync(original);
+                        if (st.dev === published.dev && st.ino === published.ino) call.sourcePath = original;
+                    } catch (e) { /* unrelated cache entry */ }
+                }
+                assert.ok(call.sourcePath, 'published audio aliases a completed cache file');
+            }
+            calls.push(call);
             if (m === 'connect') { const id = nextConn++; conns.push({ mainConnectionID: id, sourceID: a.sourceID }); return { mainConnectionID: id, amError: 'E_OK' }; }
             if (m === 'disconnect') { conns = conns.filter((c) => c.mainConnectionID !== a.mainConnectionID); return { amError: 'E_OK' }; }
             if (m === 'playFile' && slowPlayFile) await sleep(slowPlayFile);
@@ -204,7 +217,8 @@ async function main() {
         assert.strictEqual(pl.buffering, false);
         assert.ok(!fs.existsSync(ctl + '.log'), 'no fetcher');
         assert.deepStrictEqual(called('connect')[0].a, { sourceID: 1046, sinkID: 1024 });
-        assert.deepStrictEqual(called('playFile')[0].a, { path: path.join(cache, 'DemoVideo01', 'audio.m4a'), languageCode: 7695972 });
+        assert.strictEqual(called('playFile')[0].sourcePath, path.join(cache, 'DemoVideo01', 'audio.m4a'));
+        assert.strictEqual(called('playFile')[0].a.languageCode, 7695972);
         assert.strictEqual(called('playFile')[0].inst, 'OapGenericMedia');
         await waitUntil(() => ytdecLines().length > 0);
         assert.ok(ytdecLines()[0].endsWith('argv --dir ' + path.join(cache, 'DemoVideo01') + ' --rect 1836x504 --fill --log ' + path.join(tmp, 'ytdec.log')), ytdecLines()[0]);
@@ -240,7 +254,7 @@ async function main() {
         // pause = STOP where it is (the car's player answers OK to PAUSE and plays on); resume = the file again, set there
         assert.deepStrictEqual(called('sendButtonEvent').map((x) => x.a.button), ['STOP', 'STOP'], 'pause; resume releases (STOP, disconnect) and connects again');
         assert.strictEqual(called('connect').length, 1);
-        assert.deepStrictEqual(called('playFile').map((x) => x.a.path), [path.join(cache, 'DemoVideo01', 'audio.m4a')]);
+        assert.deepStrictEqual(called('playFile').map((x) => x.sourcePath), [path.join(cache, 'DemoVideo01', 'audio.m4a')]);
         // the seek sent while the file restarts wins: one setTime, there
         assert.deepStrictEqual(called('setTime').map((x) => x.a.newTimeElapsed), [30000]);
         const ins = ytdecLines().map((l) => l.split(' ').slice(1).join(' ')).filter((l) => /^in (pause|resume|seek|video)/.test(l));
@@ -372,7 +386,7 @@ async function main() {
         assert.ok(fs.statSync(path.join(cache, 'ytdlp')).isDirectory());
         assert.strictEqual(d.fetchedMs, 12000);
         assert.strictEqual(d.preparing, id);
-        assert.strictEqual(called('playFile').slice(-1)[0].a.path, path.join(dir, 'audio.m4a'));
+        assert.strictEqual(called('playFile').slice(-1)[0].sourcePath, path.join(dir, 'audio.m4a'));
         await waitUntil(() => ytdecLines().some((l2) => / argv --dir /.test(l2)));
     });
 
@@ -554,7 +568,7 @@ async function main() {
         await sleep(800);
         slowPlayFile = 0;
         assert.strictEqual(ours().length, 1, JSON.stringify(ours()));
-        assert.strictEqual(called('playFile').slice(-1)[0].a.path, path.join(cache, 'PPPPPPPPPPP', 'audio.m4a'));
+        assert.strictEqual(called('playFile').slice(-1)[0].sourcePath, path.join(cache, 'PPPPPPPPPPP', 'audio.m4a'));
         c.send({ cmd: 'stop' });
         await c.waitFor((x) => x.ev === 'state' && x.state === 'idle');
         assert.strictEqual(ours().length, 0);
@@ -576,7 +590,7 @@ async function main() {
         const id = 'FFFFFFFFFH1';
         const pl = await headPlay(id, 'head');
         assert.strictEqual(pl.buffering, false);
-        assert.strictEqual(called('playFile')[0].a.path, path.join(hdir(id), 'audio.head.m4a'));
+        assert.strictEqual(called('playFile')[0].sourcePath, path.join(hdir(id), 'audio.head.m4a'));
         await waitUntil(() => called('setTime').length === 1);
         assert.deepStrictEqual(called('playFile').map((x) => path.basename(x.a.path)), ['audio.head.m4a', 'audio.m4a']);
         assert.ok(called('setTime')[0].a.newTimeElapsed < 2000, JSON.stringify(called('setTime')[0].a));
@@ -724,7 +738,7 @@ async function main() {
         await sleep(300);
         assert.strictEqual(called('setTime').length, 0);
         assert.strictEqual(ours().length, 1);
-        assert.strictEqual(called('playFile').slice(-1)[0].a.path, path.join(cache, 'DemoVideo01', 'audio.m4a'));
+        assert.strictEqual(called('playFile').slice(-1)[0].sourcePath, path.join(cache, 'DemoVideo01', 'audio.m4a'));
         await stopIdle();
     });
 

@@ -54,7 +54,7 @@ if not (ROOT/'usr/bin/g++').exists():
 source = PROJECT/'source/native/ytdec'
 work = ROOT/'iyt-build'
 shutil.copytree(source, work, dirs_exist_ok=True, ignore=shutil.ignore_patterns('build', '__pycache__'))
-command = ['chroot', str(ROOT), '/usr/bin/make', '-C', '/iyt-build', 'target-in-docker', 'VERSION=iYT-0.4.1', 'IMAGE=-']
+command = ['chroot', str(ROOT), '/usr/bin/make', '-C', '/iyt-build', 'target-in-docker', 'VERSION=iYT-0.4.2', 'IMAGE=-']
 result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
 (PROJECT/'reports/target-build.log').write_text(result.stdout)
 print(result.stdout, flush=True)

@@ -27,3 +27,11 @@ See release-validation.json, store-discovery.json, store-sdk-link.json and extra
 - All 14 enhanced groups and all four Node8 platform-compatibility groups pass. The full online media-download regression remains skipped; live public-content metadata extraction passes using the bundled QuickJS target interpreter.
 - Service uses the platform Node8 bridge, with no jap-node22 dependency. Native QuickJS is bundled and invoked on demand. The default idle Python worker is disabled. This is not a completely Node-free implementation and no vehicle CPU/RAM improvement is claimed.
 - QuickJS source archive, pinned digest and MIT licence are included. Target loader/library checks pass for the interpreter.
+
+## Version 0.4.2
+
+Completed audio is handed to BMW MediaPlayer through a dedicated audio-only path instead of the private download directory. Hard links avoid a second media copy; journaled ownership supports cleanup and protects unrelated files. A root-run Linux test proves that another account cannot read the original private path but can read the published audio. This confirms a permission gap, not the exact MediaPlayer identity or failure cause on the reported firmware.
+
+Platform-runtime playback/account/thumbnail checks and the enhanced suites pass. Audio/container synthetic media tests pass; full online media-download and actual vehicle playback validation remain outstanding. Diagnostics now separate BMW audio/media rejection from native decoder errors and display selected format metadata without signed URLs.
+
+H.264 hardware decoding is unchanged; no software multi-format decoder has been introduced. Refresh Diagnostics after a failure to identify whether the remaining issue is audio access/parsing or native video decoding.

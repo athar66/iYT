@@ -112,6 +112,11 @@ mgu.run({
                     ' | memory: ' + (mb === null ? 'unavailable' : mb + ' MiB') +
                     ' | output: iDrive | cluster: simulator only' +
                     (m.lastError ? ' | ' + m.lastError.code + ': ' + m.lastError.message : ''));
+                const video = (m.mediaFormats || {}).video, audio = (m.mediaFormats || {}).audio;
+                ui.text('DIAG_MEDIA', 'Video: ' + (video ? (video.vcodec || 'unknown') + ' ' + (video.width || '?') + 'x' + (video.height || '?') + ' at ' + (video.fps || '?') + ' fps' : 'not reported') +
+                    ' | Audio: ' + (audio ? (audio.acodec || 'unknown') + ' (' + (audio.ext || '?') + ')' : 'not reported'));
+                ui.text('DIAG_AUDIO', 'BMW MediaPlayer: ' + (m.lastMediaPlayerError ? JSON.stringify(m.lastMediaPlayerError.event).slice(0, 240) : 'no rejection recorded'));
+                ui.text('DIAG_DECODER', 'Video decoder: ' + (m.lastDecoderError ? m.lastDecoderError.message : 'no error recorded'));
                 return;
             }
             model.onMsg(m);

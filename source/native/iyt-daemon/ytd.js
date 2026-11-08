@@ -17,6 +17,7 @@ const cp = require('child_process');
 const readline = require('readline');
 const diagnostics = require('./diagnostics');
 const uplinkLookup = require('./network').uplinkLookup;
+const AudioFiles = require('./audio-files');
 
 const ID_RE = /^[A-Za-z0-9_-]{11}$/;
 const SOURCE_ID = 1046, SINK_ID = 1024;
@@ -654,6 +655,7 @@ function Audio(opts, handlers) {
     this.cc = null;
     this.mp = null;
     this.connId = null;
+    this.files = new AudioFiles(opts);
 }
 Audio.prototype.init = async function () {
     if (this.cc && this.mp) return;
@@ -701,13 +703,14 @@ Audio.prototype.playNow = async function (file) {
     if (!r || r.amError !== 'E_OK') throw new Error('audio connect: ' + (r && r.amError));
     this.connId = r.mainConnectionID;
     if (this.connId === undefined || this.connId === null) this.connId = -1; // id unknown: release sweeps by source
-    const p = await this.mp.callMethod('playFile', { path: file, languageCode: 7695972 }, 5000);
+    const published = this.files.publish(file);
+    const p = await this.mp.callMethod('playFile', { path: published, languageCode: 7695972 }, 5000);
     this.opts.log('playFile ' + JSON.stringify(p));
     if (!p || p.EntError !== 'OK') throw new Error('playFile: ' + (p && p.EntError));
 };
 // playFile again on the live connection: after a STOP the player needs the file, not PLAY
 Audio.prototype.replay = function (file) {
-    const p = this.mp.callMethod('playFile', { path: file, languageCode: 7695972 }, 5000).then((r) => {
+    const p = Promise.resolve().then(() => this.mp.callMethod('playFile', { path: this.files.publish(file), languageCode: 7695972 }, 5000)).then((r) => {
         this.opts.log('replay ' + JSON.stringify(r));
         if (!r || r.EntError !== 'OK') throw new Error('playFile: ' + (r && r.EntError));
     });
@@ -726,7 +729,7 @@ Audio.prototype.seek = function (ms) {
 // Every exit path ends here. Safe to call twice.
 Audio.prototype.release = async function () {
     if (this.pending) await this.pending;
-    if (this.connId === null) return;
+    if (this.connId === null) { this.files.clear(); return; }
     const id = this.connId;
     this.connId = null;
     await this.button('STOP');
@@ -737,6 +740,7 @@ Audio.prototype.release = async function () {
         this.opts.log('disconnect failed: ' + e + '; sweeping source ' + SOURCE_ID);
         this.opts.log('E_AUDIO_OWNERSHIP: no source-wide sweep; explicit connection cleanup needs hardware inspection');
     }
+    this.files.clear();
 };
 
 // ---------------------------------------------------------------- daemon
@@ -1178,6 +1182,7 @@ Daemon.prototype.play = async function (id, rect, fill, at, quality, skip) {
     this.startAt = !this.opts.resume ? null : was ? (!was.done && was.ms > 10000 ? was.ms : null) : (Number(at) > 10000 ? Math.floor(Number(at)) : null);
     this.posAt = Date.now();
     this.pct = 0;
+    this.mediaFormats = {};
     this.fetchedMs = Infinity;
     this.head = null;
     this.headWait = false;
@@ -1341,6 +1346,9 @@ Daemon.prototype.fetchVideo = function (id, dir) {
                 if (m.title) this.cur.title = String(m.title);
                 if (m.duration_s > 0) this.cur.durationMs = m.duration_s * 1000;
                 if (Array.isArray(m.chapters)) this.cur.chapters = m.chapters;
+            } else if (m.ev === 'format' && (m.kind === 'audio' || m.kind === 'video') && m.format && typeof m.format === 'object') {
+                if (!this.mediaFormats) this.mediaFormats = {};
+                this.mediaFormats[m.kind] = m.format;
             } else if (m.ev === 'audio') pct(0.7 * (Number(m.pct) || 0));
             else if (m.ev === 'audio_head' && Number(m.ms) > 0) { if (head === null) { head = Number(m.ms); pct(70); } }
             else if (m.ev === 'audio_ready') {
@@ -1550,7 +1558,8 @@ Daemon.prototype.onPlayerState = function (v) {
 };
 Daemon.prototype.onPlaybackError = function (v) {
     if (!this.ticking) return;
-    this.failPlayback('playback error ' + JSON.stringify(v)).catch((e) => this.log(e));
+    this.lastMediaPlayerError = {event: v, at: new Date().toISOString()};
+    this.failPlayback('BMW MediaPlayer rejected audio: ' + JSON.stringify(v)).catch((e) => this.log(e));
 };
 
 // ---- ytdec
@@ -1597,6 +1606,7 @@ Daemon.prototype.onYtdecLine = function (child, l) {
     } else if (m.ev === 'eof') {
         this.eof = true;
     } else if (m.ev === 'error') {
+        this.lastDecoderError = {message: m.msg, at: new Date().toISOString()};
         this.log('ytdec error: ' + m.msg);
     }
 };
@@ -1617,7 +1627,7 @@ Daemon.prototype.ytdecDied = function (child, why) {
     this.deaths++;
     this.log('ytdec died (' + why + '), death ' + this.deaths);
     if (this.deaths === 1) return this.spawnYtdec(this.elapsed);
-    this.emit({ ev: 'error', msg: 'video failed, audio only' });
+    this.emit({ ev: 'error', code: 'E_VIDEO_DECODE', domain: 'decoder', msg: 'video failed, audio only' });
     return undefined;
 };
 Daemon.prototype.watchdog = function () {

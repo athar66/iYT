@@ -27,6 +27,11 @@ class Handler(BaseHTTPRequestHandler):
         pass
 
 class Reliability(unittest.TestCase):
+    def test_format_diagnostics_do_not_expose_signed_urls(self):
+        result = y.media_format({'format_id': '136', 'vcodec': 'avc1.64001f', 'height': 720, 'fps': 30,
+                                 'url': 'https://example.invalid/private?signature=secret', 'http_headers': {'Authorization': 'secret'}})
+        self.assertEqual(result, {'format_id': '136', 'vcodec': 'avc1.64001f', 'height': 720, 'fps': 30})
+
     def test_oversized_box(self):
         with self.assertRaisesRegex(ValueError, 'E_MEDIA_LIMIT'):
             y.read_box(io.BytesIO(struct.pack('>I4s', 0x7fffffff, b'mdat')))

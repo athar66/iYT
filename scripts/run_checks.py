@@ -37,6 +37,8 @@ for name, tree, daemon in [('baseline', baseline, 'jap-ridetube-d'), ('enhanced'
         print(json.dumps(entry), flush=True)
         (reports/'checks.json').write_text(json.dumps(results, indent=2)+'\n')
 for name, cmd in [('regressions', ['python3', str(r/'tests/reliability_test.py')]),
+                  ('audio-handoff', ['node', str(r/'tests/audio-files.js')]),
+                  ('error-domains', ['node', str(r/'tests/playback-error-domain.js')]),
                   ('network-dns', ['node', str(r/'tests/network-regression.js')]),
                   ('updater', ['python3', str(r/'tests/updater_test.py')]),
                   ('diagnostics', ['node', '--test', str(r/'tests/diagnostics.test.js')]),

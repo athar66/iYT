@@ -1,6 +1,6 @@
 {
   "name": "iYT",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "checks": [
     "iyt_app: size and SHA256 verified",
     "iyt-daemon: size and SHA256 verified",
