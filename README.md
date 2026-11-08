@@ -1,6 +1,6 @@
 # iYT
 
-This branch contains the **0.5.2 installation compatibility candidate**. The stable Store release remains **0.4.2**. See [candidate test instructions](docs/install-compatibility.md).
+Version **0.5.2** includes the installation compatibility change for gear-signal permissions. See [installation compatibility notes](docs/install-compatibility.md).
 
 A native YouTube player for BMW iDrive 7.
 

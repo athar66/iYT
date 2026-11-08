@@ -1,7 +1,7 @@
-# Installation compatibility candidate 0.5.2
+# Installation compatibility release 0.5.2
 
-The stable Store catalog and main branch remain at the user-confirmed working
-0.4.2. This branch is a separate source-install candidate, not a promoted release.
+Version 0.5.2 is promoted to the Store catalog and main branch at the user's
+request. The user-confirmed working 0.4.2 packages remain available for rollback.
 
 The new VehicleInformation permissions in 0.5.0 and 0.5.1 requested `rs` for
 `statusGearboxDrive` and `DataPowerTrain2`. The gear-cluster reference declares
@@ -19,8 +19,7 @@ video still requires explicit Park, zero speed and fresh data. Removing getter
 permissions does not relax that requirement: if the firmware only notifies gear
 changes and supplies no fresh Park samples, cluster video remains blocked.
 
-To test without changing the stable release, select the
-`codex/install-compatibility` branch for the iYT repository source in MGU Store.
-Update both iYT and its playback service to the candidate 0.5.2. Record the
-installation details if BMW's app manager still rejects the package. Return
-the source to Releases for the stable 0.4.2 packages.
+Refresh the iYT repository source in MGU Store using Releases, then update both
+iYT and its playback service to 0.5.2. Record the installation details if BMW's
+app manager still rejects the package. Actual vehicle installation is still
+unverified; promotion does not establish that BMW's reported failure is resolved.
