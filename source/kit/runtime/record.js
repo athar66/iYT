@@ -115,7 +115,7 @@ class Recorder {
      * runs the screen (display.js) it rings the one the controller is on. turn(d), optional: the knob
      * turned while on it goes to turn (d detents, + = clockwise) instead of to the next place.
      */
-    target(x, y, w, h, run, key, r, turn) { this.targets.push({ x, y, w, h, run, key: String(key), r, turn }); return this; }
+    target(x, y, w, h, run, key, r, turn, priority) { this.targets.push({ x, y, w, h, run, key: String(key), r, turn, priority: priority || 0 }); return this; }
 
     /* ---------- canvas.js API ---------- */
     /** Draw pixel image `id` (see setImage) scaled into x, y, w, h (nearest pixel). */

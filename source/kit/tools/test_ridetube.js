@@ -274,6 +274,11 @@ async function appFrames() {
     const vfile = process.env.MGU_YT_VIDEO = path.join(dir, 'mgu-video-iyt');
     const { headUnit } = require('./hu-stub');
     const hu = headUnit(stage, { dataDir: dir, fresh: true, image: () => Promise.resolve(), log: quiet });
+    const EventEmitter = require('events');
+    hu.ctx.app = new EventEmitter();
+    const visibilityListeners = [];
+    const originalOnVisible = hu.ui.onVisible;
+    hu.ui.onVisible = (fn) => { visibilityListeners.push(fn); originalOnVisible(fn); };
     const disp = hu.display;
     // parked: the car reads 0 km/h (the video gate counts no speed as moving)
     let speedH = null;
@@ -348,7 +353,7 @@ async function appFrames() {
         assert.deepStrictEqual(bar(), [], 'no bar where the kit runs the screen');
         assert.ok(pl.extra > 0, 'so the page reaches the screen bottom: extra ' + pl.extra);
         assert.deepStrictEqual(frame().vrect, [0, 0, pl.w, pl.h], 'the player: the video over the whole screen at once');
-        assert.deepStrictEqual(keys(), ['ov:back', 'ov:qr', 'ov:rw', 'ov:play', 'ov:ff', 'ov:q', 'ov:zoom', 'ov:bar'], 'the overlay controls');
+        assert.deepStrictEqual(keys(), ['ov:back', 'ov:qr', 'ov:rw', 'ov:play', 'ov:ff', 'ov:q', 'ov:zoom', 'ov:bar', 'action:search', 'action:settings', 'action:exit'], 'the overlay controls and persistent app actions');
         // Quality: auto -> 720 (the setting too); zoom: whole picture (default, 0.3.6) -> fill
         disp.pageTargets.find((t) => t.key === 'ov:q').run();
         await lastIs(d, { cmd: 'quality', quality: '720' }, 'Quality: the next one');
@@ -361,7 +366,7 @@ async function appFrames() {
         await hu.loopFn();
         disp.pageTargets.find((t) => t.key === 'ov:qr').run();
         await hu.loopFn();
-        assert.deepStrictEqual(keys(), ['ov:back', 'ov:qr', 'ov:qrcard'], 'On phone: the QR card over the controls');
+        assert.deepStrictEqual(keys(), ['ov:back', 'ov:qr', 'ov:qrcard', 'action:search', 'action:settings', 'action:exit'], 'On phone: the QR card over the controls');
         disp.pageTargets.find((t) => t.key === 'ov:qrcard').run();
         await hu.loopFn();
         disp.pageTargets.find((t) => t.key === 'ov:play').run();
@@ -393,7 +398,7 @@ async function appFrames() {
         console.log('ok   SponsorBlock Skip button (ask), 12 V battery guard');
         disp.onTap(800, 300);
         await hu.loopFn();
-        const hid = disp.pageTargets;
+        const hid = disp.pageTargets.filter((t) => t.key.indexOf('ov:') === 0);
         assert.ok(hid.length === 8 && hid.every((t) => t.w > 1000 && t.h > 500), 'a tap beside them: hidden, each key the whole screen');
         assert.deepStrictEqual(frame().vrect, [0, 0, pl.w, pl.h], 'the video stays whole');
         const pauses = d.cmds('pause').length;
@@ -481,10 +486,11 @@ async function appFrames() {
         hu.handlers.BTN_RESULTS();           // (the search's results page)
         await hu.loopFn();
         const ks = keys();
-        assert.deepStrictEqual(ks.slice(0, 4), ['rail:search', 'rail:home', 'rail:subs', 'rail:wl'], 'the rail first: ' + ks);
+        assert.deepStrictEqual(ks.slice(0, 3), ['rail:home', 'rail:subs', 'rail:wl'], 'navigation rail; Search is a separate visible button: ' + ks);
+        assert(!ks.includes('rail:search') && ks.includes('action:search'));
         assert.ok(ks.indexOf('rail:library') < 0, 'no Library');
         assert.ok(ks.indexOf('rail:player') < 0, 'nothing playing: no Playing');
-        assert.ok(ks.indexOf('r:0:lib1') > 3 && ks.indexOf('r:0:lib2') > 3, 'then the tiles: ' + ks);
+        assert.ok(ks.indexOf('r:0:lib1') >= 3 && ks.indexOf('r:0:lib2') >= 3, 'then the tiles: ' + ks);
         // the controller on a tile, pressed: the player; pushed left: back on that tile
         disp.onPageFocus('r:0:lib1');
         disp.pageTargets.find((t) => t.key === 'r:0:lib1').run();
@@ -697,6 +703,52 @@ async function appFrames() {
         assert.ok(d.cmds('play').some((x) => x.id === 'ZYXWVUTSRQP'), 'the next one in the row plays');
         console.log('ok   autoplay: the next video in the row, 5 s after the end');
     }
+    let keyboardNotify, keyboardStarts = 0;
+    hu.ctx.app.getUseCaseFactory = async () => ({create: async () => ({token:'test', proxy:{
+        init: async () => {}, waitUntilAvailable: async () => {},
+        notify:{subscribe: async (cb) => {keyboardNotify = cb; return 1;}, unsubscribe: async () => {}},
+        interactionState:{getValue: async () => 'READY'},
+        start: async () => {keyboardStarts++;},
+    }})});
+    const searchRequest = hu.handlers.BTN_SEARCH();
+    await until(() => keyboardStarts === 1, 1000, 'keyboard starts');
+    await hu.handlers.BTN_SEARCH();
+    assert.strictEqual(keyboardStarts, 1, 'duplicate Search does not start another keyboard');
+    assert.strictEqual(disp._shown(), false, 'app cannot cover the keyboard');
+    assert.strictEqual(disp.gpu.grabbing, false, 'controller released to the keyboard');
+    hu.ctx.app.emit('changeVisibility', {visible:false});
+    assert.strictEqual(d.conn.destroyed, false, 'native keyboard handoff must not exit its parent app');
+    keyboardNotify({interactionState:'COMPLETED', interactionParameters:new Map([[102,'test query'],[105,true]])});
+    await searchRequest;
+    await until(() => d.cmds('search').some((q) => q.q === 'test query'), 1000, 'keyboard query sent');
+    await hu.loopFn();
+    assert(disp.pageTargets.some((p) => p.key === 'action:settings'));
+    assert(disp.pageTargets.some((p) => p.key === 'action:exit'));
+    hu.ctx.app.emit('changeVisibility', {visible:false});
+    await until(() => !d.conn || d.conn.destroyed, 1000, 'hidden app disconnects playback');
+    assert.strictEqual(disp._shown(), false, 'hidden app stays hidden');
+    const connections = d.conns;
+    hu.ctx.app.emit('changeVisibility', {visible:true});
+    await until(() => d.conns > connections, 1000, 'cached app reconnects when reopened');
+    const idleSearch = hu.handlers.BTN_SEARCH();
+    await until(() => keyboardStarts === 2, 1000, 'keyboard opens with no playback');
+    assert.strictEqual(disp._shown(), false, 'idle app also yields its overlay');
+    hu.ctx.app.emit('changeVisibility', {visible:false});
+    keyboardNotify({interactionState:'ABORTED', interactionParameters:new Map()});
+    await idleSearch;
+    await hu.loopFn();
+    const closed = [];
+    hu.ui.close = async (name) => {closed.push(name);};
+    await disp.pageTargets.find((p) => p.key === 'action:exit').run();
+    await until(() => !d.conn || d.conn.destroyed, 1000, 'Exit disconnects playback');
+    assert(closed.includes('VIEW'), 'Exit closes the app screen');
+    const reopenCount = d.conns;
+    hu.ctx.app.emit('changeVisibility', {visible:true});
+    await until(() => d.conns > reopenCount, 1000, 'reopen before visibility-only close');
+    hu.ui.isVisible = () => false;
+    visibilityListeners.forEach((fn) => fn('VIEW', false));
+    await until(() => !d.conn || d.conn.destroyed, 1200, 'screen visibility alone also stops playback');
+    console.log('ok   Search yields overlay/controller, ignores duplicate opens and sends query; closing app disconnects playback');
     Recorder.prototype.text = ot; Recorder.prototype.fillRect = of;
     d.server.close();
 }

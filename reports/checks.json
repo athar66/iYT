@@ -57,19 +57,19 @@
     "suite": "enhanced",
     "test": "test_runtime",
     "code": 0,
-    "duration_s": 11.671
+    "duration_s": 11.691
   },
   {
     "suite": "enhanced",
     "test": "test_life",
     "code": 0,
-    "duration_s": 0.065
+    "duration_s": 0.064
   },
   {
     "suite": "enhanced",
     "test": "test_parked",
     "code": 0,
-    "duration_s": 0.061
+    "duration_s": 0.06
   },
   {
     "suite": "enhanced",
@@ -81,31 +81,31 @@
     "suite": "enhanced",
     "test": "test_ridetube",
     "code": 0,
-    "duration_s": 23.733
+    "duration_s": 23.84
   },
   {
     "suite": "enhanced",
     "test": "daemon",
     "code": 0,
-    "duration_s": 28.027
+    "duration_s": 28.077
   },
   {
     "suite": "enhanced",
     "test": "thumbnails",
     "code": 0,
-    "duration_s": 1.056
+    "duration_s": 1.118
   },
   {
     "suite": "enhanced",
     "test": "media",
     "code": 0,
-    "duration_s": 9.111
+    "duration_s": 9.273
   },
   {
     "suite": "enhanced",
     "test": "native",
     "code": 0,
-    "duration_s": 9.402
+    "duration_s": 1.911
   },
   {
     "suite": "enhanced",
@@ -120,6 +120,21 @@
   {
     "suite": "enhanced",
     "test": "cluster-control",
+    "code": 0
+  },
+  {
+    "suite": "enhanced",
+    "test": "controller-input",
+    "code": 0
+  },
+  {
+    "suite": "enhanced",
+    "test": "speller",
+    "code": 0
+  },
+  {
+    "suite": "enhanced",
+    "test": "touch-layout",
     "code": 0
   },
   {

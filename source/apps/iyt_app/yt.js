@@ -41,13 +41,14 @@ class Ctl {
     on(ev, fn) { this.handlers[ev].push(fn); return this; }
     _emit(ev, a) { this.handlers[ev].forEach((fn) => { try { fn(a); } catch (e) { this.log.error('yt ' + ev, e); } }); }
     connect() {
-        if (this.closed) return this;
+        if (this.closed || this.sock) return this;
         const s = this.sock = net.createConnection(this.path);
         s.setEncoding('utf8');
-        s.on('connect', () => { this.up = true; this.buf = ''; this.log.info('iyt-daemon: connected'); this._emit('up'); });
-        s.on('data', (d) => this._data(d));
+        s.on('connect', () => { if (this.sock !== s) return; this.up = true; this.buf = ''; this.log.info('iyt-daemon: connected'); this._emit('up'); });
+        s.on('data', (d) => { if (this.sock === s) this._data(d); });
         s.on('error', (e) => { if (!this.errLogged) { this.errLogged = true; this.log.warn('iyt-daemon: ' + e.message); } });
         s.on('close', () => {
+            if (this.sock !== s) return;
             const was = this.up;
             this.up = false; this.sock = null;
             if (was) { this.errLogged = false; this.log.warn('iyt-daemon: connection closed'); this._emit('down'); }
@@ -77,8 +78,12 @@ class Ctl {
     close() {
         this.closed = true;
         clearTimeout(this.retry);
-        if (this.sock) this.sock.destroy();
+        const sock = this.sock, was = this.up;
+        this.sock = null; this.up = false;
+        if (sock) sock.destroy();
+        if (was) this._emit('down');
     }
+    reopen() { if (this.closed) { this.closed = false; this.connect(); } }
 }
 
 const ACTIVE = ['preparing', 'playing', 'paused'];
