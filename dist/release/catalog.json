@@ -20,7 +20,7 @@
         "name": "iyt_app@0.5.4.tgz",
         "size": 1179834,
         "sha256": "6b6d4f65e3a40533834bb9f39fef692300358751e75216690233572a1d1425e3",
-        "url": "https://github.com/athar66/iYT/releases/download/catalog/iyt_app@0.5.4.tgz"
+        "url": "https://github.com/athar66/iYT/releases/download/catalog/iyt_app%400.5.4.tgz"
       },
       "icon": "iyt_app-0.5.4.png",
       "iconSha256": "7996efdaad95fdb7a31d15c1cd88f2737439b46538363371cca88d4322f1bd31"
@@ -45,7 +45,7 @@
         "name": "iyt-daemon@0.5.4.tgz",
         "size": 4503374,
         "sha256": "2a8a37728c42e2d1881bd0317f77caa68683e76198e9a677f7f8cf5304b91f8a",
-        "url": "https://github.com/athar66/iYT/releases/download/catalog/iyt-daemon@0.5.4.tgz"
+        "url": "https://github.com/athar66/iYT/releases/download/catalog/iyt-daemon%400.5.4.tgz"
       }
     }
   ]

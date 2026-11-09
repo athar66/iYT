@@ -1,5 +1,4 @@
 {
-  "tag": "catalog",
   "repository": "athar66/iYT",
   "assets": [
     {
@@ -43,9 +42,14 @@
       "url": "https://api.github.com/repos/athar66/iYT/releases/assets/724772671"
     },
     {
-      "name": "catalog.json",
+      "name": "catalog-archive-725691025.json",
       "size": 1675,
       "url": "https://api.github.com/repos/athar66/iYT/releases/assets/725691025"
+    },
+    {
+      "name": "catalog.json",
+      "size": 1675,
+      "url": "https://api.github.com/repos/athar66/iYT/releases/assets/725722504"
     },
     {
       "name": "iyt-daemon@0.4.0.tgz",
@@ -83,9 +87,19 @@
       "url": "https://api.github.com/repos/athar66/iYT/releases/assets/725690934"
     },
     {
+      "name": "iyt-daemon@0.5.4.tgz",
+      "size": 4503374,
+      "url": "https://api.github.com/repos/athar66/iYT/releases/assets/725722423"
+    },
+    {
       "name": "iyt_app-0.5.3.png",
       "size": 16524,
       "url": "https://api.github.com/repos/athar66/iYT/releases/assets/725690987"
+    },
+    {
+      "name": "iyt_app-0.5.4.png",
+      "size": 15907,
+      "url": "https://api.github.com/repos/athar66/iYT/releases/assets/725722448"
     },
     {
       "name": "iyt_app.png",
@@ -128,14 +142,19 @@
       "url": "https://api.github.com/repos/athar66/iYT/releases/assets/725690884"
     },
     {
+      "name": "iyt_app@0.5.4.tgz",
+      "size": 1179834,
+      "url": "https://api.github.com/repos/athar66/iYT/releases/assets/725722412"
+    },
+    {
       "name": "mgu-store.json",
       "size": 213,
       "url": "https://api.github.com/repos/athar66/iYT/releases/assets/720860932"
     },
     {
       "name": "SHA256SUMS",
-      "size": 1177,
-      "url": "https://api.github.com/repos/athar66/iYT/releases/assets/725691068"
+      "size": 1432,
+      "url": "https://api.github.com/repos/athar66/iYT/releases/assets/725722533"
     },
     {
       "name": "SHA256SUMS-720860974",
@@ -176,9 +195,15 @@
       "name": "SHA256SUMS-724772720",
       "size": 922,
       "url": "https://api.github.com/repos/athar66/iYT/releases/assets/724772720"
+    },
+    {
+      "name": "SHA256SUMS-725691068",
+      "size": 1177,
+      "url": "https://api.github.com/repos/athar66/iYT/releases/assets/725691068"
     }
   ],
   "vehicleDeployed": false,
   "releaseUrl": "https://github.com/athar66/iYT/releases/tag/catalog",
-  "private": false
+  "private": false,
+  "tag": "catalog"
 }
