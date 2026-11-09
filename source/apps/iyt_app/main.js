@@ -36,9 +36,9 @@ mgu.run({
         const { ui, settings, log } = ctx;
         const parked = Parked.watch(ctx, log, { strict: true });
         const clusterVehicle = ClusterVehicle.watch(ctx, log);
-        // Vehicle input is optional in the desktop simulator. Production remains fail closed.
-        const simulator = process.env.RTE_SIMULATOR === '1';
-        const noVideo = () => !simulator && parked.moving();
+        // Main-screen (MGU) video is never blocked by speed or gear. Only the cluster video keeps its lock:
+        // sync() sends cluster_vehicle park:true only while vehicle.allowed (Park + zero speed, fresh signals).
+        const noVideo = () => false;
 
         /* ---------- the daemon ---------- */
         const ctl = new Ctl(process.env.MGU_YT_SOCKET || SOCKET, log);

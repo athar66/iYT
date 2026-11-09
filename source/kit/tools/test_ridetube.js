@@ -347,7 +347,8 @@ async function appFrames() {
     disp.pageTargets.find((t)=>t.key==='ov:play').run();
     await until(()=>d.cmds('pause').length,1000,'pause command');
     speedH({speedVehicleCentreOfGravity:20*64});await sleep(300);await hu.loopFn();
-    assert.strictEqual(d.cmds('video').slice(-1)[0].on,false,'moving video remains blocked');
+    assert.strictEqual(d.cmds('video').slice(-1)[0].on,true,'main-screen video is not blocked while moving');
+    assert.strictEqual(d.cmds('cluster_vehicle').slice(-1)[0].park,false,'cluster video stays locked while moving');
     speedH({speedVehicleCentreOfGravity:0});
     await disp.pageTargets.find((t)=>t.key==='action:back').run();
     await sleep(100); await hu.loopFn();
