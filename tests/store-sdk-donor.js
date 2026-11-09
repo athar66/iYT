@@ -8,7 +8,7 @@ const donor = require('../upstream/mgu-store/tools/test/synthetic_donor');
 const tmp = fs.mkdtempSync(path.join(root, '.tools/iyt-donor-test-'));
 const pkg = path.join(tmp, 'package');
 fs.mkdirSync(pkg);
-cp.execFileSync('tar', ['-xzf', path.join(root, 'dist/release/iyt_app@0.5.5.tgz'), '-C', tmp]);
+cp.execFileSync('tar', ['-xzf', path.join(root, 'dist/release/iyt_app@0.5.6.tgz'), '-C', tmp]);
 assert(link.needsSdk(pkg));
 const fixture = donor.tgz(path.join(tmp, 'synthetic-donor.tgz'));
 const permissionsBefore = JSON.parse(fs.readFileSync(path.join(pkg, 'manifest.json')));

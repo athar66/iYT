@@ -1,15 +1,15 @@
 {
   "name": "iYT",
-  "version": "0.5.5",
+  "version": "0.5.6",
   "checks": [
     "iyt_app: size and SHA256 verified",
     "iyt-daemon: size and SHA256 verified",
     "SDK-free app identity, native screens and settings verified",
     "service manifest, bundled lock, unit and every payload digest verified; no link stubs shipped",
-    "ytdec: /home/claude/athar66/iyt/source/native/iyt-daemon/prebuilt/ytdec: ok",
-    "iyt-lock: /home/claude/athar66/iyt/source/native/iyt-daemon/prebuilt/iyt-lock: ok",
-    "qjs: /home/claude/athar66/iyt/source/native/iyt-daemon/prebuilt/qjs: ok",
-    "OK    /home/claude/athar66/iyt/source/native/iyt-daemon/prebuilt/ytdec: 18 checked imports, all exported by the unit's libraries"
+    "ytdec: /home/claude/iyt/source/native/iyt-daemon/prebuilt/ytdec: ok",
+    "iyt-lock: /home/claude/iyt/source/native/iyt-daemon/prebuilt/iyt-lock: ok",
+    "qjs: /home/claude/iyt/source/native/iyt-daemon/prebuilt/qjs: ok",
+    "OK    /home/claude/iyt/source/native/iyt-daemon/prebuilt/ytdec: 18 checked imports, all exported by the unit's libraries"
   ],
   "hardwareValidated": false,
   "status": "Store discovery and install artifacts ready; actual vehicle validation pending"

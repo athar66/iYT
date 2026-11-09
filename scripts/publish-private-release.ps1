@@ -19,13 +19,13 @@ try {
     catch { if ([int]$_.Exception.Response.StatusCode -ne 404) { throw } }
     if ($catalogRelease -and -not $UpdateCatalog) { throw 'Use -UpdateCatalog to update the existing release while preserving its previous assets' }
     $body = @{
-        tag_name='catalog';target_commitish='main';name='iYT 0.5.5';draft=$true;prerelease=$false
-        body="iYT 0.5.5 removes the speed and gear lock on the main-screen video: it now plays while driving. Cluster video keeps its lock and only shows in Park at zero speed with fresh vehicle signals. Playback, Horizon list layout and the Slate logo are otherwise unchanged from 0.5.4. Earlier packages remain available for rollback."
+        tag_name='catalog';target_commitish='main';name='iYT 0.5.6';draft=$true;prerelease=$false
+        body="iYT 0.5.6 fixes the oversized app icon in the iDrive 7 app drawer: it is now a 140x140 transparent launcher icon with the same blue logo and proportions and about 26-29% free space on each side, in every RHMI resource layout. The Store catalogue graphic is unchanged. Playback and all other behaviour are unchanged from 0.5.5. Earlier packages remain available for rollback."
     } | ConvertTo-Json
     $release = if ($catalogRelease) { $catalogRelease } else { Invoke-RestMethod -Method Post -Headers $headers -ContentType 'application/json' -Body $body "https://api.github.com/repos/$repoName/releases" }
     $uploadBase = ($release.upload_url -split '\{')[0]
     $assets = @{}
-    foreach ($name in @('iyt_app@0.5.5.tgz','iyt-daemon@0.5.5.tgz','iyt_app-0.5.5.png','mgu-store.json')) {
+    foreach ($name in @('iyt_app@0.5.6.tgz','iyt-daemon@0.5.6.tgz','iyt_app-0.5.6.png','mgu-store.json')) {
         $file = Join-Path $releaseDir $name
         $present = @($release.assets | Where-Object name -eq $name)
         if ($present.Count) {
