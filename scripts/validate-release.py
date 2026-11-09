@@ -7,18 +7,18 @@ import tarfile
 r = Path(__file__).resolve().parents[1]
 release = r/'dist/release'
 catalog = json.loads((release/'catalog.json').read_text())
-report = {'name': 'iYT', 'version': '0.5.4', 'checks': []}
+report = {'name': 'iYT', 'version': '0.5.5', 'checks': []}
 for component in catalog['components']:
     artifact = component['artifact']
     data = (release/artifact['name']).read_bytes()
     assert len(data) == artifact['size']
     assert hashlib.sha256(data).hexdigest() == artifact['sha256']
     report['checks'].append(component['id']+': size and SHA256 verified')
-with tarfile.open(release/'iyt_app@0.5.4.tgz') as app:
+with tarfile.open(release/'iyt_app@0.5.5.tgz') as app:
     names = app.getnames()
     assert not any('oap-sdk' in n for n in names)
     package = json.load(app.extractfile('package/package.json'))
-    assert package['name'] == 'iyt_app' and package['version'] == '0.5.4'
+    assert package['name'] == 'iyt_app' and package['version'] == '0.5.5'
     spec = json.load(app.extractfile('package/javascript/kit/app-spec.json'))
     assert spec['title'] == 'iYT'
     assert not any(s['key'] == 'video_driving' for s in spec['settings'])
@@ -31,7 +31,7 @@ with tarfile.open(release/'iyt_app@0.5.4.tgz') as app:
     view = next(s for s in spec['screens'] if s['name'] == 'VIEW')
     assert {'BTN_SETTINGS','BTN_EXIT'}.issubset({b[0] for b in view['buttons']})
     report['checks'].append('SDK-free app identity, native screens and settings verified')
-with tarfile.open(release/'iyt-daemon@0.5.4.tgz') as tool:
+with tarfile.open(release/'iyt-daemon@0.5.5.tgz') as tool:
     manifest = json.load(tool.extractfile('component.json'))
     for file in manifest['files']:
         data = tool.extractfile('files/'+file['path']).read()

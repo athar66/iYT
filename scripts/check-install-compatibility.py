@@ -11,7 +11,7 @@ def read_manifest(data):
     with tarfile.open(fileobj=io.BytesIO(data)) as package:
         return json.load(package.extractfile('package/manifest.json'))
 old = read_manifest(baseline)
-new = read_manifest((r/'dist/release/iyt_app@0.5.4.tgz').read_bytes())
+new = read_manifest((r/'dist/release/iyt_app@0.5.5.tgz').read_bytes())
 for name, permissions in old['proxies'].items():
     assert new['proxies'][name] == permissions, f'Working proxy permissions changed: {name}'
 assert old['services'] == new['services'], 'Working offered services changed'
@@ -20,7 +20,7 @@ assert added == {'de.bmw.infrastructure.VehicleInformation', 'de.bmw.infotainmen
 assert new['proxies']['de.bmw.infrastructure.VehicleInformation']['attributes'] == {
     'statusGearboxDrive': 's', 'DataPowerTrain2': 's'}
 assert new['proxies']['de.bmw.infotainment.controlelements.FrontCCU']['attributes'] == {'statusRotaryEncoderState': 's'}
-report = {'candidate': '0.5.4', 'baseline': 'user-confirmed working 0.4.2 package',
+report = {'candidate': '0.5.5', 'baseline': 'user-confirmed working 0.4.2 package',
           'existingProxyPermissionsUnchanged': True, 'offeredServicesUnchanged': True,
           'newFieldsNotificationOnly': True,
           'reportedFailureStage': 'GenerateSomeipInterface',
