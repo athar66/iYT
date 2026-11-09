@@ -1,6 +1,6 @@
 # ytdec
 
-The video half of RideTube (BMW iDrive 7 MGU, Apollo Lake,
+The video half of iYT (BMW iDrive 7 MGU, Apollo Lake,
 Intel HD 505). Reads what the car's fetcher (`iyt-daemon/ytfetch.py`) writes, decodes H.264
 on the GPU with the unit's Intel Media SDK, scales it with MSDK VPP and writes
 I420 frames to mgu-render's video file `/dev/shm/mgu-video-iyt` (MGVF,

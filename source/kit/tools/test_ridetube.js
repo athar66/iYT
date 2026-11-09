@@ -1,7 +1,7 @@
 // Modified 2026-11-07 for iYT; see licenses/NOTICE.md and docs/audit.md.
 'use strict';
 
-// RideTube (apps/iyt_app): the control-socket client and the playback state against a fake iyt-daemon daemon on a
+// iYT (apps/iyt_app): the control-socket client and the playback state against a fake iyt-daemon daemon on a
 // temporary Unix socket; then, when dist/iyt_app is built, one results and one player frame through the stubbed
 // head unit into a renderer stream (pictures as message 10, the video as 13 + op 19), the feed tabs, the sign-in
 // page and signing out; where the kit runs the screen: the rail and the bar, Home's shelves (arrows, the controller

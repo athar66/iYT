@@ -14,7 +14,7 @@ release. For a private repository, list the assets' API URLs instead (docs/PUBLI
 import argparse, gzip, hashlib, io, json, os, shutil, sys, tarfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-REPO = 'JustAnotherPU/ridetube'
+REPO = 'athar66/iYT'
 APP = 'iyt_app'
 TOOLS = ('iyt-daemon',)
 

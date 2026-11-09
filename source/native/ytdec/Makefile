@@ -1,4 +1,4 @@
-# ytdec: the video half of RideTube. README.md.
+# ytdec: the video half of iYT. README.md.
 #
 #   make test     host build + tests: NAL reader (from waze-on-cluster), index,
 #                 MGVF writer, pacing/seek/tail/eof on a fake decoder

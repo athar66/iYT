@@ -1,5 +1,5 @@
 // Modified 2026-11-07 for iYT; see licenses/NOTICE.md and docs/audit.md.
-/* ytdec: the video half of RideTube.
+/* ytdec: the video half of iYT.
  *
  *   ytdec --dir <folder> --rect <W>x<H> [--fill] [--log <file>]
  *

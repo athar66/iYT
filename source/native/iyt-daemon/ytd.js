@@ -1,7 +1,7 @@
 // Modified 2026-11-07 for iYT; see licenses/NOTICE.md and docs/audit.md.
 'use strict';
 // SPDX-License-Identifier: GPL-3.0-or-later
-// iyt-daemon daemon (RideTube): plays a video on the MGU. Audio goes through BMW's
+// iyt-daemon (iYT): plays a video on the MGU. Audio goes through BMW's
 // MediaPlayer over SOME/IP, video through
 // ytdec, paced by the MediaPlayer clock. The app talks to it on /run/iyt-daemon/ctl.sock (JSON
 // lines; README.md has the protocol). Node 8: no ?. / ?? / catch without binding.
