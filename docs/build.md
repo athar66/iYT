@@ -14,7 +14,8 @@ With the local Node22 directory on PATH:
 2. Run `python3 scripts/assemble-release.py` to create dist/release assets for athar66/iYT.
 3. Run `node tests/store-sdk-donor.js` for synthetic-donor SDK generation against the actual app package.
 4. Run `python3 scripts/validate-release.py` for payload digests and target ABI checks (needs binutils and pyelftools).
-5. Run `python3 scripts/run_checks.py` for baseline/enhanced suites; baseline's original macOS-only FFprobe helper is a recorded failure. Enhanced tests must pass.
+5. Run `python3 -I tests/launcher-icon.py --build` to rebuild iyt_app and check the app-drawer icon: 140×140, transparent, 25–30% margin, and identical bytes in every RHMI layout of the .mgu and .tgz. Regenerate the icon with `node scripts/build-brand.js` (it also rewrites icon.svg and icon.png, which must come out byte-identical).
+6. Run `python3 scripts/run_checks.py` for baseline/enhanced suites; baseline's original macOS-only FFprobe helper is a recorded failure. Enhanced tests must pass.
 
 Commit mgu-repo.json, source and prebuilt payloads to main. Users can then add athar66/iYT and choose main. For the Releases channel, upload every dist/release file to a non-draft GitHub release tagged catalog. Catalog URLs are already set to https://github.com/athar66/iYT/releases/download/catalog/.
 

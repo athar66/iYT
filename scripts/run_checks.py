@@ -43,6 +43,7 @@ for name, cmd in [('regressions', ['python3', str(r/'tests/reliability_test.py')
                   ('controller-input', ['node', str(r/'tests/controller-input.js')]),
                   ('speller', ['node', str(r/'tests/speller.js')]),
                   ('touch-layout', ['node', str(r/'tests/touch-layout.js')]),
+                  ('launcher-icon', ['python3', '-I', str(r/'tests/launcher-icon.py'), '--build']),
                   ('audio-handoff', ['node', str(r/'tests/audio-files.js')]),
                   ('error-domains', ['node', str(r/'tests/playback-error-domain.js')]),
                   ('network-dns', ['node', str(r/'tests/network-regression.js')]),

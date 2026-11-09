@@ -13,7 +13,7 @@ The RHMI layout (application.xml + uiDescription.json) is GENERATED from the
 "screens" + "settings" in app.json, using only widget templates that BMW's own
 apps use on this firmware (see reference/rhmi-widget-cells.md).
 """
-import gzip, json, os, re, shutil, sys, tarfile, tempfile, uuid
+import gzip, hashlib, json, os, re, shutil, struct, sys, tarfile, tempfile, uuid
 from xml.sax.saxutils import escape
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import pack_data  # noqa: E402
@@ -335,8 +335,30 @@ def manifest_for(spec):
     return {'proxies': proxies, 'services': PLATFORM_SERVICES}
 
 
+LAUNCHER_ICON = 'launcher_icon.png'
+LAUNCHER_ICON_SIZE = (140, 140)
+
+
+def png_size(path):
+    """(width, height) from a PNG's IHDR, or None when the file is not a PNG."""
+    with open(path, 'rb') as file:
+        head = file.read(24)
+    if len(head) < 24 or head[:8] != b'\x89PNG\r\n\x1a\n' or head[12:16] != b'IHDR':
+        return None
+    return struct.unpack('>II', head[16:24])
+
+
 def make_icon(spec, out):
-    src = os.path.join(APPS, spec['id'], 'icon.png')
+    adir = os.path.join(APPS, spec['id'])
+    # An app may ship a dedicated app-drawer tile. It is the one that goes into the RHMI resources;
+    # icon.png then stays whatever the Store catalogue uses (it is a different, larger graphic).
+    launcher = os.path.join(adir, LAUNCHER_ICON)
+    if os.path.exists(launcher):
+        if png_size(launcher) != LAUNCHER_ICON_SIZE:
+            raise SystemExit('%s must be a %dx%d PNG, found %s' % (launcher, *LAUNCHER_ICON_SIZE, png_size(launcher)))
+        shutil.copy(launcher, out)
+        return
+    src = os.path.join(adir, 'icon.png')
     if os.path.exists(src):
         shutil.copy(src, out)
         return
@@ -556,6 +578,14 @@ def build(app_id, language='en'):
     if spec.get('startWidget'):
         info = build_start_widget(spec, app_id, os.path.join(ir, 'resources', icon), os.path.join(stage, 'rhmiDataStartWidget'))
         print('  home-screen widget: %s (%s)' % (info['component'], info['layout']))
+    # every RHMI layout (package and installed format, and the widget copy) must carry the same icon bytes
+    layouts = [os.path.join(pr, 'variantGroups', 'Common', 'images', icon), os.path.join(ir, 'resources', icon)]
+    widget_icon = os.path.join(stage, 'rhmiDataStartWidget', 'resources', app_id + '_widget_icon.png')
+    if os.path.exists(widget_icon):
+        layouts.append(widget_icon)
+    digests = {hashlib.sha256(open(p, 'rb').read()).hexdigest() for p in layouts}
+    if len(digests) != 1:
+        raise SystemExit('icon differs between RHMI layouts: ' + ', '.join(os.path.relpath(p, stage) for p in layouts))
 
     # --- installer helpers + metadata ---
     shutil.copytree(os.path.join(KIT, 'tools', 'oapgen'), os.path.join(stage, 'oapgen'))
