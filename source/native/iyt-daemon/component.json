@@ -1,7 +1,7 @@
 {
   "id": "iyt-daemon",
   "kind": "tool",
-  "version": "0.5.3",
+  "version": "0.5.4",
   "license": "GPL-3.0-or-later",
   "title": "iYT playback service",
   "description": "Native playback service with BMW platform audio bridge, hardware H.264 decoding and bundled on-demand QuickJS extraction.",

@@ -19,13 +19,13 @@ try {
     catch { if ([int]$_.Exception.Response.StatusCode -ne 404) { throw } }
     if ($catalogRelease -and -not $UpdateCatalog) { throw 'Use -UpdateCatalog to update the existing release while preserving its previous assets' }
     $body = @{
-        tag_name='catalog';target_commitish='main';name='iYT 0.5.3';draft=$true;prerelease=$false
-        body="iYT 0.5.3 combines the selected original blue Slate logo with the large Horizon list layout. Main screens have Search, Settings and Exit; playback has only persistent Back, which stops playback and returns to the list. Visible rows and thumbnail requests are bounded. Cluster startup now sends a first frame before waiting for shown, fixing a reproduced renderer bootstrap deadlock. Fresh Park and zero-speed authorization still apply; an expired alternative gear source cannot veto a newer fresh reading, while fresh conflicts block output. The Park-gated map layer can request the stock map slot, with no panel/HUD output or warning suppression. Subscription-only gear permissions are retained from the working 0.5.2 install. Native/host checks pass; actual cluster output still needs testing on the vehicle. Update both app and service; earlier packages remain available for rollback."
+        tag_name='catalog';target_commitish='main';name='iYT 0.5.4';draft=$true;prerelease=$false
+        body="iYT 0.5.4 corrects the Slate logo to match the chosen mockup: slimmer, more compact proportions and the horizontal right-hand stroke restored. The app icon, in-app mark and versioned Store image use the same geometry. Playback, Horizon list layout and cluster behavior are unchanged from 0.5.3. Earlier packages remain available for rollback."
     } | ConvertTo-Json
     $release = if ($catalogRelease) { $catalogRelease } else { Invoke-RestMethod -Method Post -Headers $headers -ContentType 'application/json' -Body $body "https://api.github.com/repos/$repoName/releases" }
     $uploadBase = ($release.upload_url -split '\{')[0]
     $assets = @{}
-    foreach ($name in @('iyt_app@0.5.3.tgz','iyt-daemon@0.5.3.tgz','iyt_app-0.5.3.png','mgu-store.json')) {
+    foreach ($name in @('iyt_app@0.5.4.tgz','iyt-daemon@0.5.4.tgz','iyt_app-0.5.4.png','mgu-store.json')) {
         $file = Join-Path $releaseDir $name
         $present = @($release.assets | Where-Object name -eq $name)
         if ($present.Count) {

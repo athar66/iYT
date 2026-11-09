@@ -1,6 +1,6 @@
 # iYT
 
-Version **0.5.3** combines the original Slate logo with a large-list interface and fixes the cluster renderer's first-frame startup. The working subscription-only gear permissions from 0.5.2 are retained. See [installation compatibility notes](docs/install-compatibility.md).
+Version **0.5.4** corrects the Slate logo's proportions and restores its horizontal right-hand stroke. The large-list interface, cluster startup fixes and working subscription-only gear permissions are retained. See [installation compatibility notes](docs/install-compatibility.md).
 
 A native YouTube player for BMW iDrive 7.
 
