@@ -1,7 +1,8 @@
 # Installation compatibility release 0.5.2
 
-Version 0.5.2 is promoted to the Store catalog and main branch at the user's
-request. The user-confirmed working 0.4.2 packages remain available for rollback.
+The user confirmed that version 0.5.2 installs and runs successfully. Its
+notification-only gear permissions are retained in 0.5.3. Earlier packages
+remain available for rollback.
 
 The new VehicleInformation permissions in 0.5.0 and 0.5.1 requested `rs` for
 `statusGearboxDrive` and `DataPowerTrain2`. The gear-cluster reference declares

@@ -19,13 +19,13 @@ try {
     catch { if ([int]$_.Exception.Response.StatusCode -ne 404) { throw } }
     if ($catalogRelease -and -not $UpdateCatalog) { throw 'Use -UpdateCatalog to update the existing release while preserving its previous assets' }
     $body = @{
-        tag_name='catalog';target_commitish='main';name='iYT 0.5.2';draft=$true;prerelease=$false
-        body="iYT 0.5.2 removes unverified getter permissions from the new gear signals, using notification-only access to address the reported GenerateSomeipInterface installation failure. Actual installation still needs vehicle confirmation. It adds visible Search, Settings and Exit buttons and a separate native Settings screen. Search stops playback and releases the video overlay and controller while BMW's keyboard is open, including on a fresh launch. Duplicate opens and old completion events are guarded; setup failures can be retried. Closing or exiting stops playback and disconnects the service; reopening does not resume it automatically. Adds an optional direct BMW controller-signal fallback with duplicate protection; Diagnostics reports its input source. The old sidebar Search target is removed. Guarded map-only cluster output is retained. Host and packaging checks pass; confirm touch alignment, keyboard and rotary operation on the actual firmware. Update both app and service. Earlier packages remain available for rollback."
+        tag_name='catalog';target_commitish='main';name='iYT 0.5.3';draft=$true;prerelease=$false
+        body="iYT 0.5.3 combines the selected original blue Slate logo with the large Horizon list layout. Main screens have Search, Settings and Exit; playback has only persistent Back, which stops playback and returns to the list. Visible rows and thumbnail requests are bounded. Cluster startup now sends a first frame before waiting for shown, fixing a reproduced renderer bootstrap deadlock. Fresh Park and zero-speed authorization still apply; an expired alternative gear source cannot veto a newer fresh reading, while fresh conflicts block output. The Park-gated map layer can request the stock map slot, with no panel/HUD output or warning suppression. Subscription-only gear permissions are retained from the working 0.5.2 install. Native/host checks pass; actual cluster output still needs testing on the vehicle. Update both app and service; earlier packages remain available for rollback."
     } | ConvertTo-Json
     $release = if ($catalogRelease) { $catalogRelease } else { Invoke-RestMethod -Method Post -Headers $headers -ContentType 'application/json' -Body $body "https://api.github.com/repos/$repoName/releases" }
     $uploadBase = ($release.upload_url -split '\{')[0]
     $assets = @{}
-    foreach ($name in @('iyt_app@0.5.2.tgz','iyt-daemon@0.5.2.tgz','iyt_app.png','mgu-store.json')) {
+    foreach ($name in @('iyt_app@0.5.3.tgz','iyt-daemon@0.5.3.tgz','iyt_app-0.5.3.png','mgu-store.json')) {
         $file = Join-Path $releaseDir $name
         $present = @($release.assets | Where-Object name -eq $name)
         if ($present.Count) {

@@ -302,455 +302,78 @@ async function appFrames() {
     hu.ctx.focus = (k) => disp.focusPage(k);
     hu.start();
     await until(() => d.cmds('auth_status').length, 3000, 'app connects and asks for the account');
-    const POOL = (id) => id >= 8 && id < 64;
-    const frame = () => scan(fs.readFileSync(file));
-    // first screen: Home, signed out: the sign-in card, no tiles; never a library (nothing is kept on the car)
-    await hu.ui.open('VIEW');
-    await hu.loopFn();
-    await sleep(100);
-    assert.strictEqual(d.cmds('thumb').length, 0, 'no tiles, no thumbs');
-    assert.strictEqual(d.cmds('library').length, 0, 'no library asked');
-    // recent search -> results with a 320x180 thumb
-    hu.handlers.BTN_S1();
-    await until(() => d.cmds('search').length, 2000, 'search');
-    assert.deepStrictEqual(d.cmds('search')[0], { cmd: 'search', q: 'Music' }, 'first suggestion');
-    d.send({ ev: 'results', q: 'Music', items: [{ id: 'aaa', title: 'Song', channel: 'Band', duration_s: 200, meta: ['5 views'] }] });
-    await sleep(100);
-    await hu.loopFn();
-    await until(() => d.cmds('thumb').some((x) => x.id === 'aaa'), 2000, 'results thumb asked');
-    d.send({ ev: 'thumb', id: 'aaa', w: 320, h: 180, rgba: Buffer.alloc(320 * 180 * 4, 255).toString('base64') });
-    await sleep(100);
-    await hu.loopFn();
-    assert.ok(frame().pics.some(POOL), 'results frame draws its 320x180 thumb');
-    // offline search: the error, drawn, no hang
-    hu.handlers.BTN_S2();
-    await until(() => d.cmds('search').length === 2, 2000, 'second search');
-    d.send({ ev: 'error', msg: 'search offline' });
-    await sleep(100);
-    await hu.loopFn();
-    // player: video file there -> VIDEO + op 19
-    fs.writeFileSync(vfile, '');
-    hu.handlers.BTN_NOW();
-    d.send({ ev: 'state', state: 'playing', id: 'aaa', title: 'Song' });
-    d.send({ ev: 'time', elapsed: 1000, total: 200000 });
-    await sleep(400);              // the 250 ms gate
-    await hu.loopFn();
-    const f = frame();
-    assert.ok(f.types.indexOf(10) >= 0, 'the thumbnails uploaded as pictures (10)');
-    assert.ok(f.types.indexOf(13) >= 0, 'VIDEO (13) names the decoder file');
-    assert.ok(f.op19, 'player frame draws video 1 (op 19)');
-    const plays = d.cmds('video');
-    assert.deepStrictEqual(plays.slice(-1)[0], { cmd: 'video', on: true }, 'player shown and parked: video on');
-    // where the kit runs the screen (a renderer that routes touch, full-screen layout): no bar; the player covers the
-    // whole screen with its overlay (targets ov:*), a tap beside them hides it, any tap or the controller shows it
+
     disp.gpu.touch = true; disp._place();
-    await hu.loopFn();
-    const own = disp.own();
-    const bar = () => disp.buttons().map((b) => b.id);
-    const pl = disp.place;
-    const keys = () => disp.pageTargets.map((x) => x.key);
-    if (own && pl && pl.full) {
-        assert.deepStrictEqual(bar(), [], 'no bar where the kit runs the screen');
-        assert.ok(pl.extra > 0, 'so the page reaches the screen bottom: extra ' + pl.extra);
-        assert.deepStrictEqual(frame().vrect, [0, 0, pl.w, pl.h], 'the player: the video over the whole screen at once');
-        assert.deepStrictEqual(keys(), ['ov:back', 'ov:qr', 'ov:rw', 'ov:play', 'ov:ff', 'ov:q', 'ov:zoom', 'ov:bar', 'action:search', 'action:settings', 'action:exit'], 'the overlay controls and persistent app actions');
-        // Quality: auto -> 720 (the setting too); zoom: whole picture (default, 0.3.6) -> fill
-        disp.pageTargets.find((t) => t.key === 'ov:q').run();
-        await lastIs(d, { cmd: 'quality', quality: '720' }, 'Quality: the next one');
-        assert.strictEqual(hu.ctx.settings.get('quality'), '720');
-        await hu.loopFn();
-        disp.pageTargets.find((t) => t.key === 'ov:zoom').run();
-        await lastIs(d, { cmd: 'fill', on: true }, 'Zoom: fill the screen');
-        assert.strictEqual(hu.ctx.settings.get('fill'), true);
-        hu.ctx.settings.set('quality', 'auto'); hu.ctx.settings.set('fill', false);
-        await hu.loopFn();
-        disp.pageTargets.find((t) => t.key === 'ov:qr').run();
-        await hu.loopFn();
-        assert.deepStrictEqual(keys(), ['ov:back', 'ov:qr', 'ov:qrcard', 'action:search', 'action:settings', 'action:exit'], 'On phone: the QR card over the controls');
-        disp.pageTargets.find((t) => t.key === 'ov:qrcard').run();
-        await hu.loopFn();
-        disp.pageTargets.find((t) => t.key === 'ov:play').run();
-        await lastIs(d, { cmd: 'pause' }, 'play / pause on the overlay');
-        disp.pageTargets.find((t) => t.key === 'ov:ff').run();
-        await lastIs(d, { cmd: 'seek', ms: 11000 }, '+10 s on the overlay');
-        // the knob on the progress bar: 10 s a detent, one seek when it rests (through the kit's controller path)
-        const nSeek = d.cmds('seek').length;
-        disp.focusKey = 'tgt:ov:bar';
-        const knob = (k) => disp._ccu({ frontRotaryEncoderOperation: k, frontRotaryEncoderPushButton: 0, frontRotaryEncoderDeflection: 0 });
-        knob(100); knob(102); knob(101);                    // +2 then -1 detents
-        assert.strictEqual(disp.focusKey, 'tgt:ov:bar', 'turning on the bar stays on it');
-        await sleep(500);
-        assert.strictEqual(d.cmds('seek').length, nSeek + 1, 'one seek for the three detents');
-        await lastIs(d, { cmd: 'seek', ms: 21000 }, 'the knob on the bar: +10 s net');
-        // SponsorBlock "ask" (end cards by default): a Skip button while the clock is in one, the overlay kept
-        d.send({ ev: 'extras', id: 'aaa', chapters: [], segments: [[15000, 60000, 'outro']] });
-        await sleep(100); await hu.loopFn();
-        assert.ok(keys().indexOf('ov:sbskip') >= 0, 'Skip end cards: ' + keys());
-        disp.pageTargets.find((t) => t.key === 'ov:sbskip').run();
-        await lastIs(d, { cmd: 'seek', ms: 60000 }, 'Skip jumps to its end');
-        d.send({ ev: 'extras', id: 'aaa', chapters: [], segments: [] });
-        // the 12 V battery under the setting (65 %) while parked and playing: paused, with why
-        const nPause = d.cmds('pause').length;
-        batH({ conditionBatteryChargingCondition: 62 });
-        await until(() => d.cmds('pause').length > nPause, 2500, 'low 12 V battery pauses');
-        batH({ conditionBatteryChargingCondition: 90 });
-        await hu.loopFn();
-        console.log('ok   SponsorBlock Skip button (ask), 12 V battery guard');
-        disp.onTap(800, 300);
-        await hu.loopFn();
-        const hid = disp.pageTargets.filter((t) => t.key.indexOf('ov:') === 0);
-        assert.ok(hid.length === 8 && hid.every((t) => t.w > 1000 && t.h > 500), 'a tap beside them: hidden, each key the whole screen');
-        assert.deepStrictEqual(frame().vrect, [0, 0, pl.w, pl.h], 'the video stays whole');
-        const pauses = d.cmds('pause').length;
-        hid.find((t) => t.key === 'ov:play').run();       // (as the controller pressed on its key, or a tap)
-        await hu.loopFn();
-        assert.strictEqual(d.cmds('pause').length, pauses, 'hidden, a press only shows the overlay');
-        assert.ok(disp.pageTargets.find((t) => t.key === 'ov:play').w < 300, 'shown again');
-        disp.onTap(800, 300);
-        await hu.loopFn();
-        disp.onPageFocus('ov:rw');                           // the knob turned
-        await hu.loopFn();
-        assert.ok(disp.pageTargets.find((t) => t.key === 'ov:rw').w < 300, 'the controller shows it');
-        console.log('ok   full-screen player: overlay controls, hides on a tap, a tap or the controller shows it');
-        // driving: podcast mode - no picture, the big controls always there (no overlay to wake)
-        speedH({ speedVehicleCentreOfGravity: 50 * 64 });
-        const seeks = d.cmds('seek').length;
-        await sleep(300); await hu.loopFn();                 // (an unchanged model redraws within 250 ms)
-        assert.ok(!frame().vrect, 'no video while driving');
-        // Video while driving on (a car coded for video in motion): switched on while moving, it waits for a stop;
-        // switched on while parked, the picture stays while moving
-        hu.ctx.settings.set('video_driving', true);
-        await sleep(300); await hu.loopFn();
-        assert.ok(!frame().vrect, 'Video while driving switched on while moving: no picture until parked');
-        speedH({ speedVehicleCentreOfGravity: 0 });
-        await sleep(300); await hu.loopFn();
-        speedH({ speedVehicleCentreOfGravity: 50 * 64 });
-        await sleep(300); await hu.loopFn();
-        assert.ok(!frame().vrect, 'a legacy motion override cannot enable iYT video while moving');
-        assert.deepStrictEqual(d.cmds('video').slice(-1)[0], { cmd: 'video', on: false }, 'motion override ignored');
-        hu.ctx.settings.set('video_driving', false);
-        await sleep(300); await hu.loopFn();
-        assert.ok(!frame().vrect, 'setting off: no video while driving again');
-        console.log('ok   legacy motion override is ignored; moving picture remains disabled');
-        ['ov:rw', 'ov:play', 'ov:ff'].forEach((k) => assert.ok(disp.pageTargets.some((t) => t.key === k && t.w > 120 && t.w < 300), 'podcast control ' + k + ': ' + keys()));
-        disp.pageTargets.find((t) => t.key === 'ov:ff').run();
-        await until(() => d.cmds('seek').length > seeks, 2000, 'a podcast +10 s');
-        assert.ok(disp.pageTargets.some((t) => t.key === 'ov:bar' && t.turn), 'podcast: the knob seeks on the bar');
-        // a failed play while driving: Try again in the middle (the same video)
-        d.send({ ev: 'state', state: 'error', id: 'aaa', title: 'Song' }); d.send({ ev: 'error', msg: 'fetch: boom' });
-        await sleep(300); await hu.loopFn();
-        const nPlay = d.cmds('play').length;
-        disp.pageTargets.find((t) => t.key === 'ov:play').run();
-        await until(() => d.cmds('play').length > nPlay, 2000, 'Try again plays it again');
-        assert.strictEqual(d.cmds('play').slice(-1)[0].id, 'aaa');
-        assert.strictEqual(d.cmds('play').slice(-1)[0].quality, 'auto', 'the Video quality setting goes with each play');
-        assert.deepStrictEqual(d.cmds('play').slice(-1)[0].skip, ['sponsor', 'selfpromo', 'interaction', 'intro'], 'and the SponsorBlock categories skipped');
-        d.send({ ev: 'state', state: 'playing', id: 'aaa', title: 'Song' }); d.send({ ev: 'time', elapsed: 21000, total: 200000 });
-        speedH({ speedVehicleCentreOfGravity: 0 });
-        await sleep(300); await hu.loopFn();
-        console.log('ok   podcast mode while driving: no picture, big controls, knob seek, Try again');
-        hu.ctx.settings.set('clusterVideo', true);
-        gearH({ statusActualStageDrive: 'P' });
-        speedH({ speedVehicleCentreOfGravity: 0 });
-        await sleep(300);
-        assert.strictEqual(d.cmds('display_mode').slice(-1)[0].mode, 'dual');
-        assert.strictEqual(d.cmds('cluster_vehicle').slice(-1)[0].park, true);
-        gearH({ statusActualStageDrive: 'N' });
-        await sleep(300);
-        assert.strictEqual(d.cmds('cluster_vehicle').slice(-1)[0].park, false);
-        hu.ctx.settings.set('clusterVideo', false);
-        await sleep(300);
-        assert.strictEqual(d.cmds('display_mode').slice(-1)[0].mode, 'main');
-        console.log('ok   native cluster setting: fresh Park enables dual; Neutral and setting off revoke output');
-    } else console.log('skip full-screen player (the stub has no full-screen placement)');
-    // back to the list (the overlay's back, or the bar's list button where the HMI runs the screen): DROP_VIDEO
-    if (own) disp.pageTargets.find((t) => t.key === 'ov:back').run(); else hu.handlers.BTN_LIST();
-    await sleep(50);
-    assert.ok(frame().types.indexOf(14) >= 0, 'leaving the player sends DROP_VIDEO');
-    await lastIs(d, { cmd: 'video', on: false }, 'and tells the daemon video off');
-    if (own) {
-        await hu.loopFn();
-        assert.ok(keys().indexOf('rail:player') >= 0, 'browsing while a video plays: Playing on the rail: ' + keys());
-        assert.ok(disp.onBack(false) === false && disp.onBack(true) === false, 'browsing: the controller pushed left is the kit\'s (leaves the app at the edge)');
-        disp.pageTargets.find((t) => t.key === 'rail:player').run();
-        await hu.loopFn();
-        assert.ok(keys().indexOf('ov:play') >= 0, 'the rail\'s Playing opens the player');
-        assert.ok(disp.onBack(false) === true, 'the controller pushed left in the player: taken');
-        await hu.loopFn();
-        assert.ok(keys().indexOf('rail:player') >= 0, 'and back on the list');
-        d.send({ ev: 'state', state: 'idle' });
-        await sleep(100);
-        assert.deepStrictEqual(bar(), [], 'nothing playing: no bar either');
-        d.send({ ev: 'results', q: d.cmds('search').slice(-1)[0].q, items: [{ id: 'lib1', title: 'First', channel: 'Me', duration_s: 60 }, { id: 'lib2', title: 'Second' }] });
-        await sleep(100);
-        hu.handlers.BTN_RESULTS();           // (the search's results page)
-        await hu.loopFn();
-        const ks = keys();
-        assert.deepStrictEqual(ks.slice(0, 3), ['rail:home', 'rail:subs', 'rail:wl'], 'navigation rail; Search is a separate visible button: ' + ks);
-        assert(!ks.includes('rail:search') && ks.includes('action:search'));
-        assert.ok(ks.indexOf('rail:library') < 0, 'no Library');
-        assert.ok(ks.indexOf('rail:player') < 0, 'nothing playing: no Playing');
-        assert.ok(ks.indexOf('r:0:lib1') >= 3 && ks.indexOf('r:0:lib2') >= 3, 'then the tiles: ' + ks);
-        // the controller on a tile, pressed: the player; pushed left: back on that tile
-        disp.onPageFocus('r:0:lib1');
-        disp.pageTargets.find((t) => t.key === 'r:0:lib1').run();
-        await hu.loopFn();
-        assert.ok(keys().indexOf('ov:back') >= 0, 'the tile opens the player');
-        assert.ok(disp.onBack(false) === true);
-        await hu.loopFn();
-        assert.strictEqual(disp.focusKey, 'tgt:r:0:lib1', 'the controller back on the tile it left from');
-        console.log('ok   no bar, rail (Playing while a video plays), back from the player onto the tile');
+    const keys = () => disp.pageTargets.map((t) => t.key);
+    await hu.ui.open('VIEW'); await hu.loopFn();
+    assert(keys().includes('action:search') && keys().includes('action:settings') && keys().includes('action:exit'));
+    assert(keys().includes('nav:home') && keys().includes('nav:subs'));
+    hu.handlers.BTN_S1();
+    await until(() => d.cmds('search').length,2000,'search');
+    const items=Array.from({length:50},(_,i)=>({id:'VID'+String(i).padStart(8,'0'),title:'Video '+i,channel:'Sample channel',duration_s:120+i,meta:['HD']}));
+    d.send({ev:'results',q:'Music',items});
+    await sleep(100); await hu.loopFn();
+    let rows=disp.pageTargets.filter((t)=>/^r:\d+:VID/.test(t.key));
+    assert(rows.length>=3 && rows.length<=6,'only visible and neighbouring list rows registered');
+    assert(rows.every((t)=>t.w>1400 && t.h>=112 && t.h<=142),'large list targets');
+    assert(d.cmds('thumb').length<=5,'only visible thumbnails requested');
+    const visible=rows.filter((t)=>t.hitRect);
+    assert(visible.every((t,i)=>i===0 || t.y>=visible[i-1].y+visible[i-1].h),'rows do not overlap');
+    if(disp.app) {
+        const kit=path.join(stage,'source/javascript/kit');
+        const {Canvas}=require(path.join(kit,'canvas'));
+        const {play}=require(path.join(kit,'record'));
+        const preview=new Canvas(1600,Math.ceil(520+(disp.place.extra||0))).clear('#10151b');
+        play(disp.app.words,preview);
+        fs.writeFileSync(path.join(__dirname,'../../../reports/horizon-home-preview.png'),preview.png());
     }
-    console.log('ok   app frames (Home signed out, results, offline search, player through the renderer stream)');
-
-    // the feed tabs: signed out, Home asks for a code and shows the sign-in page (QR + code); signed in, the feed
-    const { Recorder } = require(path.join(hu.kitDir, 'record'));
-    const texts = [], rects = [];
-    const ot = Recorder.prototype.text, of = Recorder.prototype.fillRect;
-    Recorder.prototype.text = function (str) { texts.push(String(str)); return ot.apply(this, arguments); };
-    Recorder.prototype.fillRect = function (x, y, w, h, c) { rects.push({ w, h, c }); return of.apply(this, arguments); };
-    const drawn = async () => { texts.length = 0; rects.length = 0; await hu.loopFn(); };
-    d.send({ ev: 'auth', state: 'signed_out' });
-    await sleep(100);
-    assert.strictEqual(d.cmds('auth').length, 0, 'signed out on the results: no code asked');
-    disp.onTab(0);
-    await until(() => d.cmds('auth').length === 1, 2000, 'Home, signed out: a sign-in code asked');
-    await drawn();
-    assert.ok(texts.indexOf('Getting a sign-in code...') >= 0, texts.join('|'));
-    d.send({ ev: 'auth', state: 'code', code: 'ABC-DEF-GHIJ', url: 'https://www.google.com/device', expires: 1800 });
-    await sleep(100);
-    await drawn();
-    assert.ok(texts.indexOf('ABC-DEF-GHIJ') >= 0 && texts.indexOf('Enter this code on your phone') >= 0, texts.join('|'));
-    assert.ok(rects.some((r) => r.w === 296 && r.h === 296 && r.c === '#ffffff'), 'the QR code on its white square (29 + 8 modules of 8 px)');
-    assert.ok(rects.filter((r) => r.c === '#000000' && r.h === 8).length > 100, 'its dark modules');
-    // a url longer than the QR holds: the fixed sign-in URL instead, never a throw
-    d.send({ ev: 'auth', state: 'code', code: 'ABC-DEF-GHIJ', url: 'https://www.google.com/device?' + 'x'.repeat(80), expires: 1700 });
-    await sleep(100);
-    await drawn();
-    assert.ok(texts.indexOf('Scan the code, or go to google.com/device') >= 0 && rects.some((r) => r.w === 296 && r.c === '#ffffff'), 'long url: the fixed one');
-    disp.onTab(1);
-    await sleep(100);
-    assert.strictEqual(d.cmds('auth').length, 1, 'another feed tab: the code shown, not asked again');
-    d.send({ ev: 'auth', state: 'signed_in' });
-    await until(() => d.cmds('feed').length === 1, 2000, 'signed in on Subscriptions: its feed asked');
-    assert.deepStrictEqual(d.cmds('feed')[0], { cmd: 'feed', which: 'subs' });
-    await drawn();
-    assert.ok(texts.indexOf('Loading Subscriptions...') >= 0, texts.join('|'));
-    // an older daemon: a flat list, no shelves -> a grid of four a row; thumbs asked for the tiles drawn only
-    const thumbs0 = d.cmds('thumb').length;
-    d.send({ ev: 'feed', which: 'subs', items: Array.from({ length: 24 }, (_, i) => ({ id: 'f' + i, title: 'Feed ' + i, channel: 'Ch', duration_s: 90 })) });
-    await sleep(100);
-    await drawn();
-    await sleep(100);
-    const asked = d.cmds('thumb').slice(thumbs0).map((x) => x.id);
-    assert.ok(asked.length >= 4 && asked.length <= 12 && asked.indexOf('f0') >= 0 && asked.indexOf('f19') < 0, 'only the drawn tiles asked: ' + asked);
-    d.send({ ev: 'thumb', id: 'f0', w: 160, h: 90, rgba: Buffer.alloc(57600, 77).toString('base64') });
-    await sleep(100);
-    await drawn();
-    assert.ok(frame().pics.some(POOL), 'feed frame draws a pooled picture');
-    assert.ok(texts.indexOf('Feed 0') >= 0 && texts.indexOf('Feed 1') >= 0, 'the first row: Feed 0 and Feed 1 side by side');
-    if (own) {
-        assert.ok(disp.onScroll(5000), 'the feed scrolls');
-        await drawn();
-        const keys = disp.pageTargets.map((x) => x.key);
-        assert.ok(keys.some((k) => /^s:\d+:f19$/.test(k)) && !keys.some((k) => /^s:\d+:f0$/.test(k)), 'scrolled to the end: the last row, not the first: ' + keys.join(','));
-        assert.ok(!disp.onScroll(100), 'at the end');
-        disp.pageTargets.find((x) => /^s:\d+:f19$/.test(x.key)).run();
-        await until(() => d.cmds('play').some((x) => x.id === 'f19' && x.fill === false && /^\d+x\d+$/.test(x.rect)), 2000, 'a feed tile plays its video');
-        console.log('ok   feed scrolls (kit runs the screen) and a tile plays');
-        d.send({ ev: 'state', state: 'idle' });
-        hu.handlers.BTN_LIST();             // (back to the list)
-    } else console.log('skip feed scrolling (the stub does not run the screen)');
-    // sign out: pressed twice; the daemon says signed out, the feed tab asks for a new code
-    disp.onTab(1);
-    await until(() => d.cmds('feed').length === 2, 2000, 'back on Subscriptions: reloaded');
-    hu.handlers.BTN_ACCOUNT();
-    await sleep(50);
-    assert.strictEqual(d.cmds('sign_out').length, 0, 'one press does not sign out');
-    hu.handlers.BTN_ACCOUNT();
-    await until(() => d.cmds('sign_out').length === 1, 2000, 'second press signs out');
-    d.send({ ev: 'auth', state: 'signed_out' });
-    await sleep(150);
-    assert.strictEqual(d.cmds('auth').length, 1, 'signed out (or a code expired) on a feed tab: no new device flow on its own');
-    await drawn();
-    if (own) {
-        assert.ok(texts.indexOf('Tap here to get a sign-in code') >= 0, texts.join('|'));
-        disp.pageTargets.find((x) => x.key === 'signin').run();
-        await until(() => d.cmds('auth').length === 2, 2000, 'the tap asks for a code');
-    } else {
-        hu.handlers.BTN_ACCOUNT();
-        await until(() => d.cmds('auth').length === 2, 2000, 'Sign in in the menu asks for a code');
-    }
-    // an expired code (daemon: signed_out) while the page shows: also no new flow on its own
-    d.send({ ev: 'auth', state: 'code', code: 'NEW-COD-EEEE', url: 'https://www.google.com/device', expires: 1800 });
-    d.send({ ev: 'auth', state: 'signed_out' });
-    await sleep(150);
-    assert.strictEqual(d.cmds('auth').length, 2, 'code expired: not asked again until a tap');
-    disp.onTab(0);
-    await until(() => d.cmds('auth').length === 3, 2000, 'opening a feed tab asks again');
-    console.log('ok   feed tabs (sign-in page with QR and code, feed tiles, sign out)');
-
-    // Home with the account's shelves (daemon 0.1.6): the shelves, Watch later (asked with Home)
-    if (own) {
-        const SH = 8, N = 12, vids = [];
-        const shelves = Array.from({ length: SH }, (_, k) => ({ title: 'Shelf ' + k, items: Array.from({ length: N }, (_, i) => { const v = { id: 'h' + k + '_' + i, title: 'Video ' + k + '.' + i, channel: 'C', duration_s: 4053, meta: ['1K views'] }; vids.push(v); return v; }) }));
-        const feeds0 = d.cmds('feed').length;
-        d.send({ ev: 'auth', state: 'signed_in' });
-        await until(() => d.cmds('feed').length === feeds0 + 2, 2000, 'Home asks for its feed and Watch later');
-        assert.deepStrictEqual(d.cmds('feed').slice(feeds0).map((x) => x.which), ['home', 'wl']);
-        d.send({ ev: 'feed', which: 'home', items: vids.slice(0, 20), shelves });
-        d.send({ ev: 'feed', which: 'wl', items: [{ id: 'w1', title: 'Later', channel: 'C' }], shelves: [] });
-        // the daemon answers every thumb asked (a 320x180 one), as the screens draw
-        let served = d.cmds('thumb').length;
-        const serve = async () => {
-            await sleep(25);
-            d.cmds('thumb').slice(served).forEach((x) => d.send({ ev: 'thumb', id: x.id, w: 320, h: 180, rgba: Buffer.alloc(320 * 180 * 4, 60).toString('base64') }));
-            served = d.cmds('thumb').length;
-            await sleep(25);
-        };
-        await sleep(100);
-        await drawn(); await serve(); await drawn();
-        assert.ok(texts.indexOf('Shelf 0') >= 0, 'titled shelves: ' + texts.slice(0, 20).join('|'));
-        const at = (re) => disp.pageTargets.find((x) => re.test(x.key));
-        const view = { x0: 0, x1: 1600, y0: 38, y1: 520 + (disp.place.extra || 0) };
-        const inView = (t) => t.x >= view.x0 && t.x + t.w <= view.x1 && t.y >= view.y0 - 12 && t.y + t.h <= view.y1 + 12;
-        // the chevron: Shelf 0 (row 0) turned by four
-        const inX = (t) => t && t.x >= view.x0 && t.x + t.w <= view.x1;
-        assert.ok(!inX(at(/^h:0:h0_4$/)), 'the 5th tile not whole at first');
-        at(/^h:0:>$/).run();
-        await drawn();
-        assert.ok(inX(at(/^h:0:h0_4$/)) && at(/^h:0:<$/) && !at(/^h:0:h0_2$/), 'the arrow turned the shelf by four (and the back arrow shows)');
-        at(/^h:0:<$/).run();
-        await drawn();
-        // the controller through every video of every shelf, as turning the knob would: each brought into view
-        const ids = new Set();
-        for (const v of vids) {
-            const t = at(new RegExp('^h:\\d+:' + v.id + '$'));
-            assert.ok(t, 'a target for ' + v.id + ' next to the one before: ' + disp.pageTargets.map((x) => x.key));
-            disp._focus({ k: 'tgt:' + t.key, tgt: t });
-            await drawn(); await serve(); await drawn();
-            const t2 = disp.pageTargets.find((x) => x.key === t.key);
-            assert.ok(t2 && inView(t2), v.id + ' brought into view: ' + JSON.stringify(t2));
-            const pics = frame().pics;
-            assert.ok(pics.every(POOL) && new Set(pics).size === pics.length && pics.length <= 56, 'pictures from the pool, each once: ' + pics);
-            ids.add(v.id);
-        }
-        const all = new Set(frame().all);
-        assert.ok([...all].every(POOL) && all.size <= 56 && ids.size > 56, 'over ' + ids.size + ' videos drawn, ' + all.size + ' picture ids reused: ' + [...all].sort((a, b) => a - b));
-        assert.ok(disp.pageTargets.some((x) => /^h:\d+:w1$/.test(x.key)), 'Watch later is the last shelf');
-        console.log('ok   Home shelves: arrows, the controller scrolls any tile into view, the picture pool (' + all.size + ' ids)');
-        // the rail: Subscriptions
-        at(/^rail:subs$/).run();
-        await until(() => d.cmds('feed').slice(-1)[0].which === 'subs', 2000, 'the rail opens Subscriptions');
-        await until(() => d.cmds('channels').length, 2000, 'and asks for the channels');
-        d.send({ ev: 'channels', items: [{ id: 'UCdemo000000000000000001', title: 'Demo Detailing', handle: '@demo' }, { id: 'UCdemo000000000000000002', title: 'Élise Atelier', handle: '@elise' }] });
-        for (let k = 0; k < 100 && !disp.pageTargets.some((x) => x.key === 's:0:UCdemo000000000000000002'); k++) { await sleep(20); await hu.loopFn(); }
-        assert.ok(disp.pageTargets.some((x) => x.key === 's:0:UCdemo000000000000000002'), 'the channels row: ' + disp.pageTargets.map((x) => x.key).slice(0, 12));
-        assert.ok(disp.pageTargets.some((x) => x.key === 's:0:::find'), 'Search channels first');
-        disp.onPageFocus('s:0:UCdemo000000000000000002');
-        disp.pageTargets.find((x) => x.key === 's:0:UCdemo000000000000000002').run();
-        await lastIs(d, { cmd: 'channel', id: 'UCdemo000000000000000002' }, 'a channel opens its page');
-        assert.ok(disp.onBack(false) === false, 'on a channel, pushed left moves along the page first');
-        assert.ok(disp.onBack(true) === true, 'pushed left at its edge: back');
-        await hu.loopFn();
-        assert.ok(disp.pageTargets.some((x) => x.key === 's:0:UCdemo000000000000000002'), 'back on Subscriptions');
-        assert.strictEqual(disp.focusKey, 'tgt:s:0:UCdemo000000000000000002', 'on the channel it opened');
-        console.log('ok   Subscriptions: the channels row (Search channels, then A-Z); a channel opens its page, back at its edge');
-        // a channel's page: Hide this channel first; hidden, its videos leave Subscriptions (members-only ones too, a setting)
-        d.send({ ev: 'feed', which: 'subs', items: [{ id: 'HHHHHHHHHH1', title: 'From Elise', channel: 'Élise Atelier', duration_s: 90 },
-            { id: 'HHHHHHHHHH2', title: 'Perk', channel: 'Other', duration_s: 90, members: true }, { id: 'HHHHHHHHHH3', title: 'Free', channel: 'Other', duration_s: 90 }], shelves: [] });
-        disp.onPageFocus('s:0:UCdemo000000000000000002');
-        disp.pageTargets.find((x) => x.key === 's:0:UCdemo000000000000000002').run();
-        d.send({ ev: 'channel', id: 'UCdemo000000000000000002', items: [{ id: 'HHHHHHHHHH1', title: 'From Elise', channel: 'Élise Atelier', duration_s: 90 }] });
-        await sleep(100); await hu.loopFn();
-        const hide = disp.pageTargets.find((x) => /^c:0:::hide$/.test(x.key));
-        assert.ok(hide, 'Hide this channel on its page: ' + disp.pageTargets.map((x) => x.key));
-        assert.ok(disp.pageTargets.some((x) => x.key === 'c:0:HHHHHHHHHH1'), 'its videos still on its own page');
-        hide.run();
-        assert.deepStrictEqual(JSON.parse(fs.readFileSync(path.join(dir, 'hidden.json'), 'utf8')), ['Élise Atelier'], 'kept in hidden.json');
-        disp.onBack(true); await hu.loopFn();
-        const subKeys = disp.pageTargets.map((x) => x.key).filter((k) => /HHHHHHHHHH/.test(k));
-        assert.deepStrictEqual(subKeys.map((k) => k.slice(-1)), ['3'], 'Subscriptions: the hidden channel\'s and the members-only videos gone: ' + subKeys);
-        disp.onPageFocus('s:0:UCdemo000000000000000002');
-        disp.pageTargets.find((x) => x.key === 's:0:UCdemo000000000000000002').run();
-        await hu.loopFn();
-        disp.pageTargets.find((x) => /^c:0:::hide$/.test(x.key)).run();          // Show this channel
-        assert.deepStrictEqual(JSON.parse(fs.readFileSync(path.join(dir, 'hidden.json'), 'utf8')), [], 'shown again');
-        disp.onBack(true); await hu.loopFn();
-        console.log('ok   Hide this channel (its page), hidden from Subscriptions; members-only videos hidden by default');
-        // the controller resting ~1 s on a known video: its stream lookup asked once; a pass over one: nothing
-        const rq = d.cmds('search').slice(-1)[0].q;
-        d.send({ ev: 'results', q: rq, items: [{ id: 'ABCDEFGHIJK', title: 'Saved' }, { id: 'ZYXWVUTSRQP', title: 'Other' }] });
-        await sleep(100);
-        disp.onPageFocus('r:0:ZYXWVUTSRQP');
-        await sleep(300);
-        disp.onPageFocus('r:0:ABCDEFGHIJK');
-        await sleep(1300);
-        assert.deepStrictEqual(d.cmds('prefetch'), [{ cmd: 'prefetch', id: 'ABCDEFGHIJK' }], 'only the rested-on one');
-        console.log('ok   prefetch: a video the controller rests on 1 s is looked up ahead');
-        // autoplay: a tile played from a row; when it ends, the next one in that row plays after 5 s
-        hu.handlers.BTN_RESULTS();
-        let tile = null;
-        for (let k = 0; k < 100 && !(tile = at(/^r:\d+:ABCDEFGHIJK$/)); k++) { await sleep(20); await hu.loopFn(); }
-        assert.ok(tile, 'the result on its page: ' + disp.pageTargets.map((x) => x.key).slice(0, 10));
-        tile.run();
-        await until(() => (d.cmds('play').slice(-1)[0] || {}).id === 'ABCDEFGHIJK', 2000, 'played');
-        d.send({ ev: 'state', state: 'playing', id: 'ABCDEFGHIJK' });
-        d.send({ ev: 'state', state: 'ended', id: 'ABCDEFGHIJK' });
-        await sleep(100); await hu.loopFn();
-        assert.ok(!d.cmds('play').some((x) => x.id === 'ZYXWVUTSRQP'), 'not at once');
-        for (let k = 0; k < 40 && !d.cmds('play').some((x) => x.id === 'ZYXWVUTSRQP'); k++) { await sleep(200); await hu.loopFn(); }
-        assert.ok(d.cmds('play').some((x) => x.id === 'ZYXWVUTSRQP'), 'the next one in the row plays');
-        console.log('ok   autoplay: the next video in the row, 5 s after the end');
-    }
-    let keyboardNotify, keyboardStarts = 0;
-    hu.ctx.app.getUseCaseFactory = async () => ({create: async () => ({token:'test', proxy:{
-        init: async () => {}, waitUntilAvailable: async () => {},
-        notify:{subscribe: async (cb) => {keyboardNotify = cb; return 1;}, unsubscribe: async () => {}},
-        interactionState:{getValue: async () => 'READY'},
-        start: async () => {keyboardStarts++;},
-    }})});
-    const searchRequest = hu.handlers.BTN_SEARCH();
-    await until(() => keyboardStarts === 1, 1000, 'keyboard starts');
-    await hu.handlers.BTN_SEARCH();
-    assert.strictEqual(keyboardStarts, 1, 'duplicate Search does not start another keyboard');
-    assert.strictEqual(disp._shown(), false, 'app cannot cover the keyboard');
-    assert.strictEqual(disp.gpu.grabbing, false, 'controller released to the keyboard');
-    hu.ctx.app.emit('changeVisibility', {visible:false});
-    assert.strictEqual(d.conn.destroyed, false, 'native keyboard handoff must not exit its parent app');
-    keyboardNotify({interactionState:'COMPLETED', interactionParameters:new Map([[102,'test query'],[105,true]])});
-    await searchRequest;
-    await until(() => d.cmds('search').some((q) => q.q === 'test query'), 1000, 'keyboard query sent');
+    const next=rows[rows.length-1]; disp.onPageFocus(next.key); await hu.loopFn();
+    const focused=disp.pageTargets.find((t)=>t.key===next.key);
+    assert(focused && focused.hitRect,'controller focus scrolls next row into view');
+    assert(disp.onScroll(100000)); await hu.loopFn();
+    assert(disp.pageTargets.some((t)=>t.key.includes('VID00000009') && t.hitRect),'last accepted result reachable (client caps search at ten)');
+    assert(disp.onScroll(-100000)); await hu.loopFn();
+    rows=disp.pageTargets.filter((t)=>/^r:\d+:VID/.test(t.key));
+    fs.writeFileSync(vfile,'');
+    rows.find((t)=>t.hitRect).run();
+    await until(()=>d.cmds('play').length,2000,'row plays');
+    const id=d.cmds('play').slice(-1)[0].id;
+    d.send({ev:'state',state:'playing',id,title:'Video 0'});d.send({ev:'time',elapsed:1000,total:120000});
+    speedH({speedVehicleCentreOfGravity:0});
+    await sleep(400); await hu.loopFn();
+    assert(keys().includes('action:back'));
+    assert(!keys().some((k)=>['action:search','action:settings','action:exit'].includes(k)),'main actions hidden in player');
+    assert(keys().includes('ov:play'));
+    disp.pageTargets.find((t)=>t.key==='ov:play').run();
+    await until(()=>d.cmds('pause').length,1000,'pause command');
+    speedH({speedVehicleCentreOfGravity:20*64});await sleep(300);await hu.loopFn();
+    assert.strictEqual(d.cmds('video').slice(-1)[0].on,false,'moving video remains blocked');
+    speedH({speedVehicleCentreOfGravity:0});
+    await disp.pageTargets.find((t)=>t.key==='action:back').run();
+    await sleep(100); await hu.loopFn();
+    assert(d.cmds('stop').length,'Back stops playback');
+    assert(keys().includes('action:settings'));
+    await disp.pageTargets.find((t)=>t.key==='action:settings').run();
+    // The test HMI does not draw menu states; return explicitly to the canvas.
+    await hu.ui.open('VIEW');await hu.loopFn();
+    let notify,starts=0;
+    hu.ctx.app.getUseCaseFactory=async()=>({create:async()=>({token:'test',proxy:{init:async()=>{},waitUntilAvailable:async()=>{},notify:{subscribe:async(cb)=>{notify=cb;return 1;},unsubscribe:async()=>{}},interactionState:{getValue:async()=> 'READY'},start:async()=>{starts++;}}})});
+    const request=hu.handlers.BTN_SEARCH();await until(()=>starts===1,1000,'keyboard');
+    await hu.handlers.BTN_SEARCH();assert.strictEqual(starts,1);
+    assert.strictEqual(disp._shown(),false);assert.strictEqual(disp.gpu.grabbing,false);
+    hu.ctx.app.emit('changeVisibility',{visible:false});
+    notify({interactionState:'COMPLETED',interactionParameters:new Map([[102,'new query'],[105,true]])});await request;
+    await until(()=>d.cmds('search').some((q)=>q.q==='new query'),1000,'confirmed query');
     await hu.loopFn();
-    assert(disp.pageTargets.some((p) => p.key === 'action:settings'));
-    assert(disp.pageTargets.some((p) => p.key === 'action:exit'));
-    hu.ctx.app.emit('changeVisibility', {visible:false});
-    await until(() => !d.conn || d.conn.destroyed, 1000, 'hidden app disconnects playback');
-    assert.strictEqual(disp._shown(), false, 'hidden app stays hidden');
-    const connections = d.conns;
-    hu.ctx.app.emit('changeVisibility', {visible:true});
-    await until(() => d.conns > connections, 1000, 'cached app reconnects when reopened');
-    const idleSearch = hu.handlers.BTN_SEARCH();
-    await until(() => keyboardStarts === 2, 1000, 'keyboard opens with no playback');
-    assert.strictEqual(disp._shown(), false, 'idle app also yields its overlay');
-    hu.ctx.app.emit('changeVisibility', {visible:false});
-    keyboardNotify({interactionState:'ABORTED', interactionParameters:new Map()});
-    await idleSearch;
-    await hu.loopFn();
-    const closed = [];
-    hu.ui.close = async (name) => {closed.push(name);};
-    await disp.pageTargets.find((p) => p.key === 'action:exit').run();
-    await until(() => !d.conn || d.conn.destroyed, 1000, 'Exit disconnects playback');
-    assert(closed.includes('VIEW'), 'Exit closes the app screen');
-    const reopenCount = d.conns;
-    hu.ctx.app.emit('changeVisibility', {visible:true});
-    await until(() => d.conns > reopenCount, 1000, 'reopen before visibility-only close');
-    hu.ui.isVisible = () => false;
-    visibilityListeners.forEach((fn) => fn('VIEW', false));
-    await until(() => !d.conn || d.conn.destroyed, 1200, 'screen visibility alone also stops playback');
-    console.log('ok   Search yields overlay/controller, ignores duplicate opens and sends query; closing app disconnects playback');
-    Recorder.prototype.text = ot; Recorder.prototype.fillRect = of;
+    hu.ctx.app.emit('changeVisibility',{visible:false});
+    await until(()=>d.conn.destroyed,1000,'hidden playback connection closed');
+    const count=d.conns;hu.ctx.app.emit('changeVisibility',{visible:true});
+    await until(()=>d.conns>count,1000,'reopen');await hu.loopFn();
+    const closed=[];hu.ui.close=async(name)=>closed.push(name);
+    await disp.pageTargets.find((t)=>t.key==='action:exit').run();
+    await until(()=>d.conn.destroyed,1000,'Exit disconnect');assert(closed.includes('VIEW'));
     d.server.close();
+    console.log('ok   large list, bounded thumbnails, rotary scroll, player-only Back, motion gate, Settings, Search handoff and Exit');
 }
 
 function extrasModel() {

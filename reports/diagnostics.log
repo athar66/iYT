@@ -2,13 +2,13 @@ TAP version 13
 # Subtest: errors retain distinct actionable categories
 ok 1 - errors retain distinct actionable categories
   ---
-  duration_ms: 1.238556
+  duration_ms: 1.224599
   type: 'test'
   ...
 # Subtest: diagnostics never infer working acceleration from device access
 ok 2 - diagnostics never infer working acceleration from device access
   ---
-  duration_ms: 0.344375
+  duration_ms: 0.335726
   type: 'test'
   ...
 1..2
@@ -19,4 +19,4 @@ ok 2 - diagnostics never infer working acceleration from device access
 # cancelled 0
 # skipped 0
 # todo 0
-# duration_ms 80.191757
+# duration_ms 79.109886

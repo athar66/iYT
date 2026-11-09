@@ -22,6 +22,7 @@ int main() {
     int peer = -1;
     std::string input;
     bool layer = false, frame = false, dropped = false;
+    uint32_t layer_ref = 0;
     auto event = [&](const std::string &json) {
         std::string msg = cr::encode(cr::kJson, json);
         assert(send(peer, msg.data(), msg.size(), MSG_NOSIGNAL) == (ssize_t)msg.size());
@@ -40,16 +41,18 @@ int main() {
                 cr::Json json; assert(cr::parse_json(std::string(body, len), &json));
                 if (json["op"] == "hello") event("{\"ev\":\"hello\",\"proto\":1,\"backend\":\"id7\",\"targets\":\"map:1088x480\",\"repeat\":1}");
                 if (json["op"] == "layer") {
-                    assert(json["target"] == "map" && json["contend"] == "0" && json["exclusive"] == "0");
+                    assert(json["target"] == "map" && json["contend"] == "1" && json["exclusive"] == "0");
                     assert(json["z"] == "-100" && json["guide_hold"] == "0");
                     layer = true;
-                    event("{\"ev\":\"layer\",\"ref\":" + json["ref"] + ",\"state\":\"shown\"}");
+                    layer_ref = (uint32_t)std::stoul(json["ref"]);
+                    event("{\"ev\":\"layer\",\"ref\":" + json["ref"] + ",\"state\":\"stalled\"}");
                 }
                 if (json["op"] == "drop") dropped = true;
             } else if (type == cr::kFrame) {
                 cr::FrameHeader header;
                 assert(cr::parse_frame(body, len, &header));
                 frame = true;
+                event("{\"ev\":\"layer\",\"ref\":" + std::to_string(layer_ref) + ",\"state\":\"shown\"}");
             }
             input.erase(0, consumed);
         }
@@ -60,13 +63,16 @@ int main() {
     for (int i=10; i<100 && !layer; ++i) pump(i, true);
     assert(layer);
     for (int i=100; i<110; ++i) pump(i, true);
+    assert(!adapter.shown());
     std::vector<uint8_t> pixels(64*36*3/2, 128);
     assert(adapter.submit(pixels.data(), 64, 36, 1));
     for (int i=110; i<1000 && !frame; ++i) pump(i, true);
     assert(frame && adapter.submittedBytes == 1088*480*3/2);
+    for (int i=200; i<210; ++i) pump(i, true);
+    assert(adapter.shown());
     for (int i=1000; i<1100 && !dropped; ++i) pump(i, true); // expires without an app update
     assert(dropped);
     assert(!adapter.submit(pixels.data(), 64, 36, 2));
     close(peer); close(server); unlink(path.c_str());
-    std::cout << "cluster socket: hello, map layer, atlas frame and safety release passed (simulated)\n";
+    std::cout << "cluster socket: stalled-to-first-frame bootstrap, map layer, atlas frame and safety release passed (simulated)\n";
 }

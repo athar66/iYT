@@ -1,11 +1,12 @@
-# iYT controls in 0.5.1
+# iYT controls in 0.5.3
 
-**Search**, **Settings** and **Exit** are labelled buttons at the top right of
-the app, including during playback. The previous sidebar Search icon and its
-target are removed. The painted button bounds are also the touch bounds.
+**Search**, **Settings** and **Exit** are labelled buttons on the main screens.
+Playback has only a persistent **Back** button; transport controls appear on
+interaction and fade. Back stops playback and returns to the list. The painted
+button bounds are also the touch bounds.
 Persistent actions take priority over the invisible full-player wake target.
 Native HMI buttons provide the same actions when the renderer is unavailable.
-The sidebar Menu opens recent searches, account actions and Diagnostics.
+The top navigation Menu opens recent searches, account actions and Diagnostics.
 
 Settings opens its own BMW-native screen. Use the normal Back control to return.
 Exit stops playback, releases the main and cluster video outputs, closes the

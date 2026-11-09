@@ -453,7 +453,11 @@ class Display {
      * running the screen also on a bar button (pressed), a sheet's targets, or the page (ctx.onTap).
      */
     _touch(phase, x, y) {
-        const inside = (r) => x >= r.x && x < r.x + r.w && y >= r.y && y < r.y + r.h;
+        const inside = (r) => {
+            if (r.hitRect === false) return false;
+            const box = r.hitRect || r;
+            return x >= box.x && x < box.x + box.w && y >= box.y && y < box.y + box.h;
+        };
         if (this.own()) {
             const pl = this.place, sx = x * pl.scale + pl.ox, sy = y * pl.scale + pl.oy;
             // the app takes the whole gesture (a stream under the page): screen px, phase 1 down, 2 move, 3 up

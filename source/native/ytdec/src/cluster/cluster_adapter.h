@@ -33,7 +33,7 @@ public:
             }
             cr::LayerOptions lo;
             lo.target = "map";
-            lo.contend = false;
+            lo.contend = true; // Park-gated map request; renderer only takes over the stock map.
             lo.exclusive = false;
             lo.guide_hold = false;
             lo.z = -100;
@@ -45,7 +45,9 @@ public:
         }
     }
     bool submit(const uint8_t *p, unsigned w, unsigned h, uint64_t id) {
-        if (!permitted_ || !ref_ || !shown_ || !client_->connected()) return false;
+        // The renderer needs a first frame before its layer can become "shown".
+        // Visibility is diagnostic state, not permission to bootstrap the stream.
+        if (!permitted_ || !ref_ || !client_->connected()) return false;
         if (client_->frame_waiting(ref_)) { ++dropped; return false; }
         atlas(p, w, h, 1088, 480, atlas_);
         if (!client_->frame(ref_, &atlas_, id)) return false;

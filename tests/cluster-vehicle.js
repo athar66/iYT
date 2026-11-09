@@ -28,7 +28,7 @@ t += 2001;
 assert.strictEqual(s.snapshot().allowed, false);
 s.gearbox({ statusActualStageDrive: 'P' });
 s.speed({ speedVehicleCentreOfGravity: 0 });
-assert.strictEqual(s.snapshot().allowed, false); // second source must also be fresh
+assert.strictEqual(s.snapshot().allowed, true); // a fresh explicit Park source can replace an expired alternative
 s.powertrain({ statusGearSelectionDrive: 'P' });
 assert.strictEqual(s.snapshot().allowed, true);
 t -= 1;

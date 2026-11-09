@@ -1,5 +1,5 @@
 {
-  "candidate": "0.5.2",
+  "candidate": "0.5.3",
   "baseline": "user-confirmed working 0.4.2 package",
   "existingProxyPermissionsUnchanged": true,
   "offeredServicesUnchanged": true,

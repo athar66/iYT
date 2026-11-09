@@ -22,7 +22,7 @@ function report(daemon) {
     try { fs.accessSync('/dev/dri/renderD128', fs.constants.R_OK | fs.constants.W_OK); gpu = 'accessible'; }
     catch (e) { gpu = e.code === 'ENOENT' ? 'unavailable' : 'permission-denied'; }
     return {
-        ev: 'diagnostics', version: '0.5.2', node: process.version,
+        ev: 'diagnostics', version: '0.5.3', node: process.version,
         uptime_s: process.uptime(), memory: process.memoryUsage(),
         gpuDevice: gpu, hardwareAcceleration: 'unverified',
         decoderRunning: !!daemon.child, state: daemon.state,

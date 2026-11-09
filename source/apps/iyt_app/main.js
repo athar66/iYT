@@ -1,40 +1,6 @@
-// Modified 2026-11-07 for iYT; see licenses/NOTICE.md and docs/audit.md.
+// Modified 2026-11-09 for iYT; see licenses/NOTICE.md and docs/audit.md.
 'use strict';
-/**
- * iYT - search and play videos through the car daemon iyt-daemon (ytd.js, a root service), which
- * fetches them on the car itself, plays the sound through BMW's own media player (the car's audio source)
- * and decodes the picture (ytdec) into
- * /dev/shm/mgu-video-iyt, which the renderer (mgu-render) draws in this app's layer (op 19).
- *
- * Screens (a TV-style dark look: navy, neon pink and cyan, big 16:9 tiles):
- *   VIEW  (first) drawn page. Browsing: an icon rail on the left (Search = the HMI menu, Home, Subscriptions,
- *         Watch later; the page shown lit, a pink mark) and, right of it, rows of tiles: a 320 x 180
- *         thumb (its length in a pill), the title in up to two lines, "channel · 125K views · 1 day ago".
- *           home     shelves, each titled, turned sideways on their own: Continue watching, the account's
- *                    Home shelves (daemon `feed` shelves; an older daemon: its flat list as a grid), Watch later
- *           subs     the account's Subscriptions shelves (or the flat list as a grid)
- *           wl / results   a grid, four a row: Watch later, a search's results
- *           Not signed in, on a feed page: the sign-in card, a QR code for google.com/device and the code to
- *           enter there (the daemon's TV device sign-in: it keeps the account, the app never sees a token).
- *           The page scrolls (a finger, the controller turned on the page); the controller pushed or turned onto
- *           a tile brings it into view (ctx.onPageFocus), the arrows at a shelf's edges turn it for a finger.
- *           Thumbs are asked only for the tiles drawn, and drawn from a pool of 56 picture ids.
- *           player   where the kit runs the screen: the video over the whole screen (no header, no bar), under
- *                    the overlay: back to the list and the title / channel (top), -10 s, play / pause,
- *                    +10 s (middle), the progress bar with the times (bottom). A tap or the controller shows
- *                    it; it hides 4 s later while the picture plays (a tap beside the controls hides it at once);
- *                    preparing, paused, driving or no picture: it stays, with the "Preparing... N %" ring.
- *                    The controller pushed left goes back to the list (the HMI's BACK key closes the screen).
- *                    Where the HMI runs the screen: the video in a box under the header, over the HMI's bar.
- *         bar: none where the kit runs the screen (the rail and the overlay have its jobs; a "Playing" rail entry
- *         while something plays), so the pages reach the screen's bottom. Where the HMI runs the screen: all five
- *         (Play/Pause, -10 s, +10 s, the list / Now playing, Search), and the header has the page tabs (G.frame).
- *   MAIN  HMI menu (Search): the HMI's speller, Now playing, Results, Home, Subscriptions, Watch later, recent
- *         searches / suggestions, then Sign in / Sign out (pressed twice).
- *
- * Vehicle checks gate video. Search releases rendering and controller capture for BMW's keyboard.
- * Leaving or exiting stops playback and closes the service connection. Settings has its own screen.
- */
+/** Native list browser, BMW keyboard handoff, audio/video playback and Park-gated map output. */
 const fs = require('fs');
 const path = require('path');
 const mgu = require('./kit/mgu');
@@ -43,6 +9,7 @@ const QR = require('./kit/qr');
 const { setImage } = require('./kit/record');
 const { HMI } = require('./kit/display');
 const Parked = require('./kit/parked');
+const Brand = require('./brand');
 const ClusterVehicle = require('./kit/cluster-vehicle');
 const { Ctl, Model, clock, SOCKET, FEEDS, SHELF_MAX } = require('./yt');
 const { spell, cancel: cancelSpell } = require('./speller');
@@ -52,9 +19,7 @@ const BOX = { x: 12, y: 38, w: 1576, h: 432 };          // the video, in the pag
 const VID = 1, VPATH = process.env.MGU_YT_VIDEO || '/dev/shm/mgu-video-iyt';     // (env: tests)
 const POOL0 = 8, POOL = 56;                               // picture ids POOL0.. for the thumbs drawn (a pool, by video)
 const TOP = 38;                                          // the page shows from here down (the kit: y 38..520 + extra)
-const RAIL_W = 116;                                      // the icon rail, x 12..116
-const X0 = 136, TW = 320, TH = 180, PITCH = 348, PER_ROW = 4;   // tiles: 16:9 thumbs, four a row, the fifth peeking
-const TILE_H = TH + 98, HEAD_H = 50, SHELF_GAP = 30, GRID_GAP = 22;   // a tile with its text; a shelf's title row
+const RAIL_W = 0;
 const OVERLAY_MS = 4000;                                 // the player's controls hide this long after a tap (playing)
 const SEARCH_MS = 8000;                                  // a search with no answer by then is an error on screen
 const SUGGEST = ['Music', 'News', 'Cars', 'Podcasts', 'Comedy', 'Trailers'];
@@ -154,6 +119,7 @@ mgu.run({
             if (m !== 'player') browse = m; else wake();
             openFeed(); sync(); labels();
         }
+        function backToBrowse() { stopPlayback(); goBack(browse); }
         function goBack(m) {
             show(m);
             if (backKey[m] && ctx.focus) ctx.focus(backKey[m]);
@@ -387,7 +353,7 @@ mgu.run({
         // the controller pushed left in the player: back to the list it came from; pushed left at a channel's
         // edge (the rail): back to Subscriptions. Both put the controller back on the tile it left from
         if (ctx.onBack) ctx.onBack((edge) => {
-            if (mode === 'player') { goBack(browse); return true; }
+            if (mode === 'player') { backToBrowse(); return true; }
             if (mode === 'channel' && edge) { goBack(chanFrom); return true; }
             return false;
         });
@@ -454,33 +420,12 @@ mgu.run({
             return e.pid;
         }
 
-        // a title in at most two lines of TW px (the second one ellipsised), cached by title
-        const wraps = new Map();
-        function wrap(cv, s) {
-            let v = wraps.get(s);
-            if (v) return v;
-            const words = s.split(/\s+/).filter(Boolean);
-            let l1 = '', i = 0;
-            for (; i < words.length; i++) { const t = l1 ? l1 + ' ' + words[i] : words[i]; if (cv.textWidth(t, 24, LITB) > TW) break; l1 = t; }
-            let rest = words.slice(i).join(' ');
-            if (!l1 && rest) {                           // one word wider than the tile: cut it
-                let n = rest.length;
-                while (n > 1 && cv.textWidth(rest.slice(0, n), 24, LITB) > TW) n--;
-                l1 = rest.slice(0, n); rest = rest.slice(n);
-            }
-            v = rest ? [l1, fit(cv, rest, 24, TW, LITB)] : [l1];
-            if (wraps.size > 400) wraps.clear();
-            wraps.set(s, v);
-            return v;
-        }
-        if (ctx.onLayout) ctx.onLayout(() => wraps.clear());          // (text widths follow the scale)
-
         // a play triangle pointing right, centred on cx, cy, s px tall
         const tri = (cv, cx, cy, s, c) => cv.quad([[cx - s * 0.38, cy - s / 2], [cx + s * 0.5, cy], [cx - s * 0.38, cy + s / 2], [cx - s * 0.38, cy - s / 2]], c);
         // Try again: a circle arrow (cv.arc's ring, its head at the top)
         const retryGlyph = (cv, cx, cy, r, c) => { cv.arc(cx, cy, r - 5, r, 40, 340, c); cv.quad([[cx - 4, cy - r - 9], [cx + 10, cy - r + 2], [cx - 4, cy - r + 12], [cx - 4, cy - r - 9]], c); };
         // iYT's mark: a cyan screen outline with the pink play mark in it
-        const logo = (cv, cx, cy, w) => { cv.strokeRoundRect(cx - w / 2, cy - w * 0.33, w, w * 0.66, w * 0.16, Math.max(3, Math.round(w * 0.06)), C.cyan); tri(cv, cx + w * 0.04, cy, w * 0.32, C.red); };
+        const logo = (cv, cx, cy, w) => Brand.draw(cv, cx, cy, w);
 
         /* the left rail: Search, Home, Subscriptions, Watch later */
         const RAIL = [
@@ -498,73 +443,19 @@ mgu.run({
         // while something plays: back to the player (the bar's Now playing, where the kit runs the screen)
         const PLAYING = ['player', 'Playing', (cv, x, y, c) => { [10, 20, 14].forEach((h, k) => cv.roundRect(x - 15 + k * 11, y + 8 - h, 8, h + 8, 2, c)); }];
         function drawRail(cv) {
-            const sel = mode === 'results' ? 'search' : mode === 'channel' ? 'subs' : mode, bottom = H + (cv.own ? cv.extra : 0);
-            const navigation = RAIL.filter((item) => item[0] !== 'search').concat([
-                ['menu', 'Menu', (r, x, y, c) => { [-12, 0, 12].forEach((dx) => r.circle(x + dx, y, 4, c)); }],
-            ]);
-            const items = cv.own && model.active() ? navigation.concat([PLAYING]) : navigation;
-            const pitch = Math.min(100, (bottom - 156) / (items.length - 1));   // (the page down to the screen's bottom where it reaches)
-            items.forEach(([m, name, glyph], i) => {
-                const cx = 62, cy = 96 + Math.round(i * pitch), on = m === sel, bg = on ? '#2c2c2c' : C.bg, c = on ? '#ffffff' : C.dim;
-                if (on) { cv.roundRect(18, cy - 38, 90, 84, 16, bg); cv.roundRect(18, cy - 14, 5, 28, 2.5, C.red); }
-                glyph(cv, cx, cy - 8, c, bg);
-                cv.text(name === 'Subscriptions' ? 'Subs' : name, cx, cy + 34, 18, c, { literal: true, align: 'center', font: on ? 'bold' : 'label' });
-                if (cv.own) cv.target(18, cy - 38, 90, 84, () => (m === 'menu' ? ui.open('MAIN') : show(m)), 'rail:' + m, 16);
+            Brand.draw(cv, 54, TOP + 33, 60);
+            cv.text('iYT', 92, TOP + 44, 34, C.text, LITB);
+            const items = [['home','Home',150],['subs','Subscriptions',210],['wl','Watch later',180],['menu','Menu',120]];
+            let x = 220;
+            items.forEach(([name,label,width]) => {
+                const selected = mode === name || (name === 'subs' && mode === 'channel');
+                cv.roundRect(x, TOP + 8, width, 44, 9, selected ? C.red : C.bg);
+                cv.text(label, x + width/2, TOP + 37, 23, selected ? '#ffffff' : C.dim, {literal:true,align:'center',font:'bold'});
+                if (cv.own) cv.target(x,TOP+8,width,44,() => name === 'menu' ? ui.open('MAIN') : show(name),'nav:'+name,9,undefined,1);
+                x += width + 10;
             });
         }
 
-        /* a tile: the 16:9 thumb, its length, two lines of title, the channel and the tile's meta (views, age) */
-        function drawTile(cv, r, x, y, key) {
-            const cur = r.id === model.id && model.active();
-            if (key === focusKey) cv.roundRect(x - 10, y - 10, TW + 20, TILE_H + 16, 18, C.card);
-            const th = model.thumbs[r.id];
-            if (!th) model.wantThumb(r.id);
-            const pid = th && cv.place ? slot(r.id, th) : null;
-            if (pid) cv.picture(pid, x, y, TW, TH, 12);
-            else { cv.roundRect(x, y, TW, TH, 12, C.ph); cv.circle(x + TW / 2, y + TH / 2, 30, '#ffffff10'); tri(cv, x + TW / 2 + 2, y + TH / 2, 24, '#ffffff38'); }
-            const p = model.pos[r.id];   // watched (here, else on the account): a bar along the thumbnail's foot
-            const frac = p ? (p.done ? 1 : Math.min(1, p.ms / p.total)) : r.watched_pct > 0 ? r.watched_pct / 100 : 0;
-            if (frac > 0) {
-                const pw = Math.max(8, Math.round(TW * frac));
-                cv.fillRect(x, y + TH - 5, TW, 5, '#ffffff55');
-                cv.fillRect(x, y + TH - 5, pw, 5, C.red);
-            }
-            if (r.duration_s > 0) {
-                const d = clock(r.duration_s * 1000), dw = cv.textWidth(d, 20, LITB) + 16;
-                cv.roundRect(x + TW - 8 - dw, y + TH - 36, dw, 28, 6, '#000000cc');
-                cv.text(d, x + TW - 16, y + TH - 15, 20, '#ffffff', { literal: true, font: 'bold', align: 'right' });
-            }
-            if (cur) {
-                cv.strokeRoundRect(x - 2, y - 2, TW + 4, TH + 4, 14, 3, C.red);
-                const pw = cv.textWidth('NOW PLAYING', 16, { literal: true, font: 'bold', spacing: 1 }) + 20;
-                cv.roundRect(x + 10, y + 10, pw, 28, 6, C.red);
-                cv.text('NOW PLAYING', x + 20, y + 30, 16, '#ffffff', { literal: true, font: 'bold', spacing: 1 });
-            }
-            const lines = wrap(cv, String(r.title || r.id));
-            lines.forEach((l, k) => cv.text(l, x, y + TH + 32 + k * 30, 24, C.text, LITB));
-            const my = y + TH + 32 + lines.length * 30 - 2;
-            const meta = [r.channel].concat(Array.isArray(r.meta) ? r.meta : []).filter((m) => typeof m === 'string' && m).join(' · ');
-            if (meta) cv.text(fit(cv, meta, 20, TW, LIT), x, my, 20, C.dim, LIT);
-        }
-
-        /* a channel: a round mark with its initial, its name, its @handle; or an action (r.act: Search channels, All) */
-        const HUES = ['#c62828', '#ad1457', '#6a1b9a', '#283593', '#1565c0', '#00838f', '#2e7d32', '#9e9d24', '#ef6c00', '#4e342e'];
-        function drawChan(cv, r, x, y, key) {
-            if (key === focusKey) cv.roundRect(x - 10, y - 10, TW + 20, TILE_H + 16, 18, C.card);
-            const cx = x + TW / 2, cy = y + TH / 2, name = String(r.title || r.id);
-            let h = 0;
-            for (const ch of r.id) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
-            if (r.act) {
-                cv.roundRect(x, y, TW, TH, 12, C.ph);
-                r.glyph(cv, cx, cy, '#ffffff');
-            } else {
-                cv.circle(cx, cy, 78, HUES[h % HUES.length]);
-                const ini = (Array.from(name).find((ch) => /[0-9]/.test(ch) || ch.toLowerCase() !== ch.toUpperCase()) || name.charAt(0) || '?').toUpperCase();   // (Node 8: no \p{L})
-                cv.text(ini, cx, cy + 26, 72, '#ffffff', { literal: true, font: 'bold', align: 'center' });
-            }
-            cv.text(fit(cv, name, 24, TW, LITB), cx, y + TH + 36, 24, C.text, { literal: true, font: 'bold', align: 'center' });
-            if (r.sub || r.handle) cv.text(fit(cv, r.sub || r.handle, 20, TW, LIT), cx, y + TH + 66, 20, C.dim, { literal: true, align: 'center' });
-        }
         const KEYS = (cv, cx, cy, c) => {                 // a keyboard
             cv.strokeRoundRect(cx - 46, cy - 30, 92, 60, 10, 4, c);
             for (let k = 0; k < 5; k++) { cv.roundRect(cx - 34 + k * 15, cy - 18, 9, 9, 2, c); cv.roundRect(cx - 34 + k * 15, cy - 3, 9, 9, 2, c); }
@@ -603,76 +494,77 @@ mgu.run({
                 .map((s, i) => (i === 0 ? Object.assign({}, s, { title: c.title + (s.title ? ' · ' + s.title : ''), items: [tog].concat(s.items) }) : s)));
         }
 
-        // a shelf's arrow for touch: shifts it by four tiles. Its target goes before the tiles' (a tap on it is not
-        // the tile under it), the drawing after them (returned: drawn by the caller once the tiles are)
-        function chevron(cv, cx, cy, dir, run, key) {
-            cv.target(cx - 32, cy - 32, 64, 64, run, key, 32);
-            return () => {
-                cv.circle(cx, cy, 32, '#00000099'); cv.circle(cx, cy, 29, key === focusKey ? '#ffffff' : '#303030');
-                cv.polyline([[cx - 5 * dir, cy - 11], [cx + 6 * dir, cy], [cx - 5 * dir, cy + 11]], 4.5, key === focusKey ? '#0f0f0f' : '#ffffff');
-            };
-        }
-
-        /*
-         * A browsing page: rows of tiles, each a shelf (its own sideways offset, a title) or a grid's row of four.
-         * sections [{ title, items, grid }]. Scrolls up and down (a finger, the controller); targets for the tiles
-         * shown, one more past each edge of a shelf and the rows next to the ones shown (the controller moves
-         * there, onPageFocus brings it into view). Keys: <mode letter>:<row>:<video id>.
-         */
+        // Shared vertical layout for feeds, results and channel pages.
         const view = {};                                  // mode -> { sy, off: { row: first tile shown } }
         const vs = (m) => view[m] || (view[m] = { sy: 0, max: 0, off: {} });
         let laid = { mode: null, rows: [], viewH: 0, where: {} }, focusKey = null, dwell = null;
-        function layout(sections) {
+        function layout(sections, rowH) {
             const rows = [];
-            let y = 10;
-            sections.forEach((sc) => {
-                const chunks = sc.grid ? [] : [sc.items];
-                if (sc.grid) for (let i = 0; i < sc.items.length; i += PER_ROW) chunks.push(sc.items.slice(i, i + PER_ROW));
-                chunks.forEach((items, k) => {
-                    const title = k === 0 ? sc.title : null, h = (title ? HEAD_H : 0) + TILE_H + (sc.grid && k < chunks.length - 1 ? GRID_GAP : SHELF_GAP);
-                    rows.push({ title, sub: k === 0 ? sc.sub : null, items, y, h, hs: !sc.grid && items.length > PER_ROW, chan: !!sc.chan });
-                    y += h;
-                });
-            });
-            return { rows, h: y };
+            let y = 6;
+            sections.forEach((sc) => sc.items.forEach((item,i) => {
+                const title = i === 0 ? sc.title : null;
+                const head = title ? 34 : 0;
+                rows.push({title,items:[item],y,h:head+rowH+8,head,chan:!!sc.chan,hs:false});
+                y += head + rowH + 8;
+            }));
+            return {rows,h:y};
         }
         function drawPage(cv, sections) {
-            const st = vs(mode), bottom = H + (cv.own ? cv.extra : 0), viewH = bottom - TOP, L = layout(sections);
-            st.max = Math.max(0, L.h - viewH);
-            st.sy = Math.max(0, Math.min(st.max, st.sy));
-            const where = {}, letter = mode[0];
-            const ys = L.rows.map((r) => TOP + r.y - st.sy);
-            const vis = L.rows.map((r, i) => ys[i] + r.h > TOP && ys[i] < bottom);
-            const first = vis.indexOf(true), lastV = vis.lastIndexOf(true), after = [];
-            cv.clip(RAIL_W, TOP, W - RAIL_W, bottom - TOP);
-            L.rows.forEach((row, ri) => {
-                if (ri < first - 1 || ri > lastV + 1) return;
-                const y = ys[ri], shown = vis[ri], n = row.items.length, ty = y + (row.title ? HEAD_H : 0);
-                if (row.title && shown) {
-                    const tw = cv.text(fit(cv, row.title, 30, 1100, LITB), X0, y + 34, 30, '#ffffff', LITB);
-                    if (row.sub) cv.text(row.sub, X0 + tw + 18, y + 34, 22, C.dim, LIT);
-                }
-                const max = row.hs ? n - PER_ROW : 0, off = Math.max(0, Math.min(max, st.off[ri] || 0));
-                st.off[ri] = off;
-                // touch: arrows where tiles are hidden (recorded first: a tap on one is not the tile under it)
-                if (cv.own && shown && row.hs) {
-                    if (off > 0) after.push(chevron(cv, X0 + 4, ty + TH / 2, -1, () => { st.off[ri] = Math.max(0, off - PER_ROW); dirty = true; }, letter + ':' + ri + ':<'));
-                    if (off < max) {
-                        after.push(() => { for (let k = 0; k < 6; k++) cv.fillRect(W - 108 + k * 16, ty - 10, 16, TILE_H + 16, [15, 15, 15, Math.round(255 * (0.3 + k * 0.14))]); });
-                        after.push(chevron(cv, W - 48, ty + TH / 2, 1, () => { st.off[ri] = Math.min(max, off + PER_ROW); dirty = true; }, letter + ':' + ri + ':>'));
+            const top = TOP + 80, bottom = H + (cv.own ? cv.extra : 0), viewH = bottom - top;
+            const rowH = Math.max(112,Math.min(142,Math.floor((viewH-64)/3)));
+            const st = vs(mode), L = layout(sections,rowH), where = {}, letter = mode[0];
+            st.max = Math.max(0,L.h-viewH); st.sy = Math.max(0,Math.min(st.max,st.sy));
+            const allVideos = sections.reduce((items,sc) => sc.chan ? items : items.concat(sc.items.filter((item) => !item.act)),[]);
+            cv.clip(20,top,W-40,viewH);
+            L.rows.forEach((row,ri) => {
+                const y = top + row.y - st.sy;
+                if (y + row.h < top-rowH || y > bottom+rowH) return;
+                const item = row.items[0], key = letter+':'+ri+':'+item.id, cy = y+row.head;
+                const visible = cy+rowH>top && cy<bottom, x=26, width=W-52;
+                if (row.title && y+34>top && y<bottom) cv.text(fit(cv,row.title,24,width,LITB),x+4,y+25,24,C.dim,LITB);
+                if (visible) {
+                    cv.roundRect(x,cy,width,rowH,12,key===focusKey?'#21364b':C.card);
+                    if (key===focusKey) cv.strokeRoundRect(x,cy,width,rowH,12,3,C.red);
+                    const th=rowH-16, tw=Math.round(th*16/9), tx=x+tw+30;
+                    if (row.chan || item.act) {
+                        const cx=x+tw/2+8, my=cy+rowH/2;
+                        cv.circle(cx,my,Math.min(th/2-4,40),C.ph);
+                        if (item.glyph) item.glyph(cv,cx,my,C.text);
+                        else cv.text((String(item.title||item.id)[0]||'?').toUpperCase(),cx,my+13,36,C.text,{literal:true,font:'bold',align:'center'});
+                    } else {
+                        const thumb=model.thumbs[item.id];
+                        if (!thumb) model.wantThumb(item.id);
+                        const pid=thumb&&cv.place?slot(item.id,thumb):null;
+                        if (pid) cv.picture(pid,x+8,cy+8,tw,th,8);
+                        else {cv.roundRect(x+8,cy+8,tw,th,8,C.ph);tri(cv,x+8+tw/2,cy+rowH/2,24,C.dim);}
+                        if (item.duration_s>0) {
+                            const text=clock(item.duration_s*1000), bw=cv.textWidth(text,18,LITB)+14;
+                            cv.roundRect(x+tw-bw+2,cy+rowH-35,bw,24,5,'#000000d9');
+                            cv.text(text,x+tw-5,cy+rowH-17,18,'#ffffff',{literal:true,font:'bold',align:'right'});
+                        }
                     }
+                    cv.text(fit(cv,item.title||item.id,30,width-(tx-x)-70,LITB),tx,cy+rowH*0.43,30,C.text,LITB);
+                    const detail=item.sub||[item.channel,(item.meta||[]).join(' · ')].filter(Boolean).join(' · ')||item.handle||'';
+                    cv.text(fit(cv,detail,22,width-(tx-x)-70,LIT),tx,cy+rowH*0.73,22,C.dim,LIT);
+                    cv.polyline([[x+width-36,cy+rowH/2-8],[x+width-28,cy+rowH/2],[x+width-36,cy+rowH/2+8]],3,C.dim);
+                    const progress=model.pos[item.id];
+                    if (progress&&progress.total) cv.fillRect(tx,cy+rowH-9,Math.round((width-(tx-x)-64)*Math.min(1,progress.ms/progress.total)),3,C.red);
                 }
-                for (let i = Math.max(0, off - 1); i <= Math.min(n - 1, off + PER_ROW); i++) {
-                    const r = row.items[i], x = X0 + (i - off) * PITCH, key = letter + ':' + ri + ':' + r.id;
-                    if (shown && x + TW > RAIL_W && x < W) (row.chan || r.act ? drawChan : drawTile)(cv, r, x, ty, key);
-                    const run = r.act ? () => r.act() : row.chan ? () => openChannel(r) : () => play(r.id, r, row.items);
-                    if (cv.own) { cv.target(x - 10, ty - 10, TW + 20, TILE_H + 16, run, key, 18); where[key] = { ri, i }; }
+                if (cv.own) {
+                    const action=item.act?()=>item.act():row.chan?()=>openChannel(item):()=>play(item.id,item,allVideos);
+                    const hit=visible?{x,y:Math.max(top,cy),w:width,h:Math.max(0,Math.min(bottom,cy+rowH)-Math.max(top,cy))}:false;
+                    cv.target(x,cy,width,rowH,action,key,12,undefined,0,hit);
+                    where[key]={ri,i:0};
                 }
             });
-            after.forEach((fn) => fn());
             cv.noclip();
-            laid = { mode, rows: L.rows, viewH, where };
-            if (cv.own && st.max > 0) cv.scroll = true;
+            laid={mode,rows:L.rows,viewH,where};
+            if (st.max>0) {
+                const thumbH=Math.max(28,viewH*viewH/L.h), thumbY=top+(viewH-thumbH)*st.sy/st.max;
+                cv.roundRect(W-12,top,4,viewH,2,C.ph);
+                cv.roundRect(W-12,thumbY,4,thumbH,2,C.red);
+                if (cv.own) cv.scroll={y:top,bar:{x:W-12,y:thumbY,w:4,h:thumbH}};
+            }
         }
         // the controller on a tile: its shelf turned and the page scrolled so that it shows whole
         if (ctx.onPageFocus) ctx.onPageFocus((key) => {
@@ -687,8 +579,7 @@ mgu.run({
             if (!w) return;
             const st = vs(mode), row = laid.rows[w.ri];
             if (row.hs) {
-                const off = st.off[w.ri] || 0;
-                if (w.i < off) st.off[w.ri] = w.i; else if (w.i > off + PER_ROW - 1) st.off[w.ri] = w.i - PER_ROW + 1;
+
             }
             const top = row.y - 8, bot = row.y + row.h;
             if (top < st.sy) st.sy = Math.max(0, top); else if (bot > st.sy + laid.viewH) st.sy = Math.min(st.max, bot - laid.viewH);
@@ -921,7 +812,7 @@ mgu.run({
             // top: back to the list, the title and channel over a scrim
             cv.gradientRect(0, 0, SW, 160, [[0, '#000000d8'], [1, '#00000000']]);
             const bx = LX + 44, by = 52;
-            ctl('ov:back', bx, by, 30, () => goBack(browse), (c) => cv.polyline([[bx + 5, by - 12], [bx - 7, by], [bx + 5, by + 12]], 5, c));
+            ctl('ov:back', bx, by, 30, () => backToBrowse(), (c) => cv.polyline([[bx + 5, by - 12], [bx - 7, by], [bx + 5, by + 12]], 5, c));
             const ch = model.channel || (model.item(model.id) || {}).channel;
             if (model.title) cv.text(fit(cv, model.title, 30, SW - LX - 160, LITB), LX + 96, by - 4, 30, '#ffffff', LITB);
             if (ch) cv.text(fit(cv, ch, 22, SW - LX - 300, LIT), LX + 96, by + 30, 22, '#cccccc', LIT);
@@ -1048,11 +939,13 @@ mgu.run({
                     // where the kit runs the screen the rail has the pages: the header shows just the name
                     if (cv.own) G.frame(cv, ctx.theme(), [], -1); else G.frame(cv, ctx.theme(), TABS.map((m) => NAMES[m]), TABS.indexOf(mode));
                 }
-                [['Search', openSearch, 'search'], ['Settings', openSettings, 'settings'], ['Exit', exitApp, 'exit']].forEach(([label, action, key], i) => {
-                    const x = W - 404 + i * 132, y = TOP + 8;
-                    cv.roundRect(x, y, 124, 44, 10, focusKey === 'action:' + key ? C.red : C.card);
-                    cv.text(label, x + 62, y + 29, 22, C.text || '#ffffff', {literal: true, align: 'center', font: 'bold'});
-                    if (cv.own) cv.target(x, y, 124, 44, action, 'action:' + key, 10, undefined, 1);
+                const actions = mode === 'player' ? [['Back', () => backToBrowse(), 'back']] :
+                    [['Search',openSearch,'search'],['Settings',openSettings,'settings'],['Exit',exitApp,'exit']];
+                actions.forEach(([label,action,key],i) => {
+                    const x=mode==='player'?32:W-404+i*132, y=TOP+8;
+                    cv.roundRect(x,y,124,44,10,focusKey==='action:'+key?C.red:C.card);
+                    cv.text(label,x+62,y+29,22,C.text,{literal:true,align:'center',font:'bold'});
+                    if(cv.own) cv.target(x,y,124,44,action,'action:'+key,10,undefined,1);
                 });
                 last = cv;
             }

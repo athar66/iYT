@@ -1,6 +1,6 @@
-# Cluster map video: 0.5.0 hardware test
+# Cluster map video: 0.5.3 hardware test
 
-Update **both iYT and iYT playback service to 0.5.0** from MGU Store.
+Update **both iYT and iYT playback service to 0.5.3** from MGU Store.
 The Store dependency is `cluster-render` 0.4.2 or newer. Leave the standard
 Store sources enabled so it can resolve this dependency.
 
@@ -17,8 +17,7 @@ Store sources enabled so it can resolve this dependency.
 
 The output is the 1088×480 `map` target at at most 8 fps, letterboxed from the
 existing hardware decoder. No panel, HUD or full-cluster target is requested.
-Navigation/other content is above this non-exclusive layer; the app does not
-retry a slot taken by the stock HMI and does not suppress the guidance box.
+Navigation/other content is above this non-exclusive layer; the app requests the stock map slot only while parked and does not suppress the guidance box.
 It may therefore wait behind stock content rather than force itself visible.
 
 Only explicit Park and zero speed qualify. Neutral, the ambiguous `NP` value,

@@ -36,7 +36,7 @@ function create(now) {
         snapshot: () => {
             const t = now(), samples = Object.keys(gears).map((k) => gears[k]);
             const live = samples.filter((g) => fresh(g.at, t));
-            const known = live.length > 0 && live.length === samples.length && live.every((g) => g.stage !== null);
+            const known = live.length > 0 && live.every((g) => g.stage !== null);
             const conflict = known && live.some((g) => g.stage !== live[0].stage);
             const stage = known && !conflict ? live[0].stage : null;
             const speedFresh = speed !== null && fresh(speedAt, t);

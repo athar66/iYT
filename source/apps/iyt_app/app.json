@@ -2,7 +2,7 @@
   "id": "iyt_app",
   "title": "iYT",
   "description": "YouTube for BMW iDrive 7 with native audio and optional Park-only video in the cluster map area.",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "license": "GPL-3.0-or-later",
   "vendor": "custom",
   "loggingId": "OARE",

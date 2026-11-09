@@ -57,55 +57,55 @@
     "suite": "enhanced",
     "test": "test_runtime",
     "code": 0,
-    "duration_s": 11.687
+    "duration_s": 11.685
   },
   {
     "suite": "enhanced",
     "test": "test_life",
     "code": 0,
-    "duration_s": 0.064
+    "duration_s": 0.063
   },
   {
     "suite": "enhanced",
     "test": "test_parked",
     "code": 0,
-    "duration_s": 0.059
+    "duration_s": 0.06
   },
   {
     "suite": "enhanced",
     "test": "test_qr",
     "code": 0,
-    "duration_s": 0.113
+    "duration_s": 0.112
   },
   {
     "suite": "enhanced",
     "test": "test_ridetube",
     "code": 0,
-    "duration_s": 24.358
+    "duration_s": 4.548
   },
   {
     "suite": "enhanced",
     "test": "daemon",
     "code": 0,
-    "duration_s": 28.04
+    "duration_s": 28.152
   },
   {
     "suite": "enhanced",
     "test": "thumbnails",
     "code": 0,
-    "duration_s": 1.122
+    "duration_s": 0.709
   },
   {
     "suite": "enhanced",
     "test": "media",
     "code": 0,
-    "duration_s": 9.206
+    "duration_s": 10.083
   },
   {
     "suite": "enhanced",
     "test": "native",
     "code": 0,
-    "duration_s": 8.478
+    "duration_s": 9.2
   },
   {
     "suite": "enhanced",

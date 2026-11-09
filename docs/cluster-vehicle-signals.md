@@ -14,7 +14,7 @@ Vehicle speed comes from the existing Vehicle2 speed signal, scaled by 1/64 km/h
 Only exact zero speed qualifies.
 
 The guard rejects missing, invalid, conflicting, future-dated or older-than-two-second
-samples. Every selector source that has supplied a sample must remain fresh.
+samples. At least one explicit selector must remain fresh; conflicting fresh selector readings block output. An expired alternative does not invalidate a newer explicit Park reading.
 Provider loss clears the samples. Polling requests fresh values only where the
 installed BMW interface exposes a getter; polling cannot make a subscription-only
 field fresh. The actual target interface still needs to demonstrate fresh Park and
