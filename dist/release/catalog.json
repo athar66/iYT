@@ -1,52 +1,52 @@
 {
-  "schema": 2,
-  "components": [
-    {
-      "id": "iyt_app",
-      "kind": "app",
-      "version": "0.5.6",
-      "title": "iYT",
-      "description": "YouTube for BMW iDrive 7: search, signed-in shelves, native audio and hardware H.264 video.",
-      "mguHmi": [
-        "ID7"
-      ],
-      "uninstallable": true,
-      "requires": {
-        "iyt-daemon": "0.5.6",
-        "mgu-render": "0.6.11",
-        "mgu-inputgate": "1.0.0"
-      },
-      "artifact": {
-        "name": "iyt_app@0.5.6.tgz",
-        "size": 1188309,
-        "sha256": "96fd842fa1f83025a47c559ddcb85d13932da8f72ce7b1296a940b85d784c845",
-        "url": "https://github.com/athar66/iYT/releases/download/catalog/iyt_app@0.5.6.tgz"
-      },
-      "icon": "iyt_app-0.5.6.png",
-      "iconSha256": "7996efdaad95fdb7a31d15c1cd88f2737439b46538363371cca88d4322f1bd31"
-    },
-    {
-      "id": "iyt-daemon",
-      "kind": "tool",
-      "version": "0.5.6",
-      "title": "iYT playback service",
-      "description": "Native playback service with BMW platform audio bridge, hardware H.264 decoding and bundled on-demand QuickJS extraction.",
-      "requires": {
-        "cluster-render": "0.4.2",
-        "mgu-deploy": "0.7.0",
-        "mgu-python": "1.0.2",
-        "mgu-render": "0.6.11"
-      },
-      "mguHmi": [
-        "ID7"
-      ],
-      "uninstallable": true,
-      "artifact": {
-        "name": "iyt-daemon@0.5.6.tgz",
-        "size": 4503082,
-        "sha256": "42432e777e62bd98e21e22604c639f2f998a55806fa82ad324b03bf6eead8909",
-        "url": "https://github.com/athar66/iYT/releases/download/catalog/iyt-daemon@0.5.6.tgz"
-      }
-    }
-  ]
+    "schema":  2,
+    "components":  [
+                       {
+                           "id":  "iyt_app",
+                           "kind":  "app",
+                           "version":  "0.5.6",
+                           "title":  "iYT",
+                           "description":  "YouTube for BMW iDrive 7: search, signed-in shelves, native audio and hardware H.264 video.",
+                           "mguHmi":  [
+                                          "ID7"
+                                      ],
+                           "uninstallable":  true,
+                           "requires":  {
+                                            "iyt-daemon":  "0.5.6",
+                                            "mgu-render":  "0.6.11",
+                                            "mgu-inputgate":  "1.0.0"
+                                        },
+                           "artifact":  {
+                                            "name":  "iyt_app@0.5.6.tgz",
+                                            "size":  1188309,
+                                            "sha256":  "96fd842fa1f83025a47c559ddcb85d13932da8f72ce7b1296a940b85d784c845",
+                                            "url":  "https://github.com/athar66/iYT/releases/download/catalog/iyt_app%400.5.6.tgz"
+                                        },
+                           "icon":  "iyt_app-0.5.6.png",
+                           "iconSha256":  "7996efdaad95fdb7a31d15c1cd88f2737439b46538363371cca88d4322f1bd31"
+                       },
+                       {
+                           "id":  "iyt-daemon",
+                           "kind":  "tool",
+                           "version":  "0.5.6",
+                           "title":  "iYT playback service",
+                           "description":  "Native playback service with BMW platform audio bridge, hardware H.264 decoding and bundled on-demand QuickJS extraction.",
+                           "requires":  {
+                                            "cluster-render":  "0.4.2",
+                                            "mgu-deploy":  "0.7.0",
+                                            "mgu-python":  "1.0.2",
+                                            "mgu-render":  "0.6.11"
+                                        },
+                           "mguHmi":  [
+                                          "ID7"
+                                      ],
+                           "uninstallable":  true,
+                           "artifact":  {
+                                            "name":  "iyt-daemon@0.5.6.tgz",
+                                            "size":  4503082,
+                                            "sha256":  "42432e777e62bd98e21e22604c639f2f998a55806fa82ad324b03bf6eead8909",
+                                            "url":  "https://github.com/athar66/iYT/releases/download/catalog/iyt-daemon%400.5.6.tgz"
+                                        }
+                       }
+                   ]
 }
